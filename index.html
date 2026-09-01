@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- VERSIÓN 3: HTML, CSS y JS en archivos separados. -->
+<title>SEISA — Sistemas Eléctricos Integrados S.A.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/estilos.css">
+<script>document.documentElement.classList.add('js-anim');</script>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="site-header">
+    <a class="brand" href="#inicio" data-go="inicio" aria-label="SEISA — inicio">
+      <img src="img/logo.png" alt="SEISA — Sistemas Eléctricos Integrados S.A.">
+    </a>
+    <nav class="nav" id="nav">
+      <a href="#inicio"   data-go="inicio"   class="is-active">Inicio</a>
+      <a href="#nosotros" data-go="nosotros">Nosotros</a>
+      <a href="#contacto" data-go="contacto">Contacto</a>
+    </nav>
+    <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav">
+      <span></span><span></span><span></span>
+    </button>
+    <button class="btn-login" data-go="login">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M4.8 20c.8-3.6 3.7-5.6 7.2-5.6s6.4 2 7.2 5.6"/></svg>
+      <span>Iniciar sesion</span>
+    </button>
+  </header>
+
+  <!-- ===================== INICIO ===================== -->
+  <section class="page is-active" id="inicio">
+    <div class="hero">
+      <div class="hero-photo"></div>
+      <div class="hero-veil"></div>
+      <svg class="circuit circuit-left" viewBox="0 0 150 900" fill="none" aria-hidden="true">
+        <path d="M40 30 H95 V300" stroke="#2FA8DE" stroke-width="2"/>
+        <path d="M22 70 H70 V430" stroke="#2FA8DE" stroke-width="2" opacity=".8"/>
+        <path d="M55 250 V620 H20" stroke="#2FA8DE" stroke-width="2" opacity=".7"/>
+        <path d="M95 380 V870" stroke="#2FA8DE" stroke-width="2" opacity=".55"/>
+        <circle cx="40" cy="30" r="5" fill="#6CD3FF"/>
+        <circle cx="20" cy="620" r="5" fill="#6CD3FF"/>
+        <circle cx="95" cy="870" r="5" fill="#6CD3FF"/>
+      </svg>
+      <div class="wrap" style="width:100%">
+        <div class="hero-copy">
+          <h1>Soluciones eléctricas que conectan<br><span class="hl">con el futuro</span></h1>
+          <p class="lead">Desde 2019, brindamos servicios técnicos confiables para impulsar una operación eléctrica segura y eficiente.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#nosotros" data-go="nosotros">Conócenos
+              <svg width="22" height="16" viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h19M14 2l6 6-6 6"/></svg>
+            </a>
+            <a class="btn btn-ghost" href="#contacto" data-go="contacto">Contáctanos
+              <svg width="22" height="16" viewBox="0 0 22 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h19M14 2l6 6-6 6"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <div class="services">
+        <article class="card service">
+          <div class="ico-circle">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#1B6FB8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="8" y="8" width="30" height="48" rx="4"/>
+              <rect x="14" y="15" width="18" height="13" rx="2"/>
+              <path d="M16 24l4-6 4 8 4-9 2 7"/>
+              <circle cx="23" cy="42" r="7"/><path d="M23 42l4-3"/>
+              <path d="M46 20v22a6 6 0 0 0 12 0V30" stroke="#1B6FB8"/>
+              <path d="M44 14v10M50 14v10" />
+            </svg>
+          </div>
+          <div class="vrule"></div>
+          <h3>Equipos de<br>Medición</h3>
+        </article>
+
+        <article class="card service">
+          <div class="ico-circle">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#1B6FB8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 6v52M28 6v52"/>
+              <path d="M16 16h12M16 26h12M16 36h12M16 46h12"/>
+              <circle cx="41" cy="21" r="6"/>
+              <path d="M41 27v13l-6 10M41 40l7 10"/>
+              <path d="M35 32h14M49 32l6-6"/>
+            </svg>
+          </div>
+          <div class="vrule"></div>
+          <h3>Operación en<br>Campo</h3>
+        </article>
+
+        <article class="card service">
+          <div class="ico-circle">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#1B6FB8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="44" cy="14" r="6"/>
+              <path d="M44 2v3M44 23v3M56 14h3M29 14h3M52.5 5.5l2 2M33.5 22.5l2 2M52.5 22.5l2-2M33.5 5.5l2-2"/>
+              <path d="M14 32h30l8 24H6l8-24z"/>
+              <path d="M12 40h34M9 48h40M25 32l-4 24M35 32l4 24"/>
+            </svg>
+          </div>
+          <div class="vrule"></div>
+          <h3>Energía<br>Renovable</h3>
+        </article>
+      </div>
+
+      <div class="stats">
+        <svg class="deco l" viewBox="0 0 180 120" fill="none" aria-hidden="true">
+          <path d="M0 30h60l16-16h60" stroke="#2FA8DE" stroke-width="2"/>
+          <path d="M0 60h40l16 16h70" stroke="#E3453F" stroke-width="2" opacity=".7"/>
+          <path d="M0 90h80" stroke="#2FA8DE" stroke-width="2" opacity=".5"/>
+        </svg>
+        <svg class="deco r" viewBox="0 0 180 120" fill="none" aria-hidden="true">
+          <path d="M0 30h60l16-16h60" stroke="#2FA8DE" stroke-width="2"/>
+          <path d="M0 60h40l16 16h70" stroke="#E3453F" stroke-width="2" opacity=".7"/>
+          <path d="M0 90h80" stroke="#2FA8DE" stroke-width="2" opacity=".5"/>
+        </svg>
+        <div class="stat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4.5" width="18" height="17" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18M8.5 15.5l2.5 2.5 4.5-4.5"/>
+          </svg>
+          <span>Desde 2019</span>
+        </div>
+        <div class="stat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="8" r="3.6"/><path d="M2.5 20c.7-3.4 3.3-5.3 6.5-5.3s5.8 1.9 6.5 5.3"/><path d="M16.5 5.2a3.4 3.4 0 0 1 0 6.6M18 14.9c2 .8 3.3 2.5 3.7 5.1"/>
+          </svg>
+          <span>38 Equipo técnico especializado</span>
+        </div>
+        <div class="stat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 21.5s7-6.1 7-11.1a7 7 0 1 0-14 0c0 5 7 11.1 7 11.1z"/><circle cx="12" cy="10" r="2.8"/>
+          </svg>
+          <span>Guatemala, Escuintla, Sacatepéquez</span>
+        </div>
+      </div>
+
+      <div class="infobar card">
+        <div class="place">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1F7FD0" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 21.5s7-6.1 7-11.1a7 7 0 1 0-14 0c0 5 7 11.1 7 11.1z"/><circle cx="12" cy="10" r="2.8"/>
+          </svg>
+          <span>Villa Nueva, Guatemala</span>
+        </div>
+        <div class="hours">Horario de atención:<br>Lunes a viernes, de 8:00 a. m. a 5:00 p. m.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== NOSOTROS ===================== -->
+  <section class="page" id="nosotros">
+    <div class="hero">
+      <div class="hero-photo"></div>
+      <div class="hero-veil"></div>
+      <svg class="circuit circuit-left" viewBox="0 0 150 900" fill="none" aria-hidden="true">
+        <path d="M40 30 H95 V320" stroke="#2FA8DE" stroke-width="2"/>
+        <path d="M22 70 H70 V480" stroke="#2FA8DE" stroke-width="2" opacity=".8"/>
+        <path d="M55 260 V700 H20" stroke="#2FA8DE" stroke-width="2" opacity=".7"/>
+        <path d="M95 400 V870" stroke="#2FA8DE" stroke-width="2" opacity=".55"/>
+        <circle cx="40" cy="30" r="5" fill="#6CD3FF"/>
+        <circle cx="20" cy="700" r="5" fill="#6CD3FF"/>
+        <circle cx="95" cy="870" r="5" fill="#6CD3FF"/>
+      </svg>
+      <div class="wrap" style="width:100%">
+        <div class="hero-copy">
+          <p class="eyebrow">Quiénes somos</p>
+          <h1>Experiencia técnica,<br>visión de <span class="hl">futuro</span></h1>
+          <p class="lead">SEISA nació en 2019 con la experiencia de un equipo que decidió trabajar directamente como contratista de EEGSA.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap">
+      <div class="duo">
+        <article class="card pillar">
+          <div class="ico-circle">
+            <svg viewBox="0 0 64 64" fill="#1B6FB8"><path d="M36 4L16 36h12l-4 24 22-34H33l3-22z"/></svg>
+          </div>
+          <div class="pillar-body">
+            <h3>Nuestra misión</h3>
+            <p>Brindar un servicio de calidad a EEGSA y continuar expandiéndonos mediante nuevos proyectos y oportunidades de crecimiento.</p>
+          </div>
+        </article>
+        <article class="card pillar">
+          <div class="ico-circle">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#123E6E" stroke-width="3.4">
+              <circle cx="30" cy="34" r="22"/><circle cx="30" cy="34" r="13"/><circle cx="30" cy="34" r="4.5" fill="#123E6E"/>
+              <path d="M30 34L56 8" stroke-linecap="round"/><path d="M45 8h11v11" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="pillar-body">
+            <h3>Nuestra visión</h3>
+            <p>Para 2028, contar con unidades renovadas y ampliar nuestra capacidad para responder a la demanda operativa.</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="timeline">
+        <svg class="deco l" viewBox="0 0 180 120" fill="none" aria-hidden="true" style="position:absolute;left:0;top:0;height:100%;width:150px;opacity:.7">
+          <path d="M10 40h40l14-14h60" stroke="#E3453F" stroke-width="2"/>
+          <path d="M10 74h40l14 14h60" stroke="#2FA8DE" stroke-width="2" opacity=".8"/>
+        </svg>
+        <svg class="deco r" viewBox="0 0 180 120" fill="none" aria-hidden="true" style="position:absolute;right:0;top:0;height:100%;width:150px;opacity:.7;transform:scaleX(-1)">
+          <path d="M10 40h40l14-14h60" stroke="#2FA8DE" stroke-width="2"/>
+          <path d="M10 74h40l14 14h60" stroke="#E3453F" stroke-width="2" opacity=".8"/>
+        </svg>
+        <div class="tl-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4.5" width="18" height="17" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18M8.5 15.5l2.5 2.5 4.5-4.5"/>
+          </svg>
+          <span><span class="num">2019</span> · Fundación de SEISA</span>
+        </div>
+        <div class="tl-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="8" r="3.6"/><path d="M2.5 20c.7-3.4 3.3-5.3 6.5-5.3s5.8 1.9 6.5 5.3"/><path d="M16.5 5.2a3.4 3.4 0 0 1 0 6.6M18 14.9c2 .8 3.3 2.5 3.7 5.1"/>
+          </svg>
+          <span><span class="num">7 socios</span> · Un mismo propósito</span>
+        </div>
+        <div class="tl-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 20V10M9 20V5M15 20v-7M21 20V8"/><path d="M14 4l7-1-1 7" stroke-linejoin="round"/>
+          </svg>
+          <span><span class="num">2028</span> · Renovación y crecimiento</span>
+        </div>
+      </div>
+
+      <div class="zones card">
+        <div class="zt">
+          <svg viewBox="0 0 24 24" fill="#1F7FD0"><path d="M12 22s7-6.3 7-11.4A7 7 0 1 0 5 10.6C5 15.7 12 22 12 22zm0-14.2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/></svg>
+          <span>Donde operamos</span>
+        </div>
+        <div class="zone-list">
+          <span class="zone">Guatemala</span>
+          <span class="zone">Escuintla</span>
+          <span class="zone">Sacatepéquez</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== CONTACTO ===================== -->
+  <section class="page" id="contacto">
+    <div class="hero">
+      <div class="hero-photo"></div>
+      <div class="hero-veil"></div>
+      <svg class="circuit circuit-left" viewBox="0 0 150 900" fill="none" aria-hidden="true">
+        <path d="M40 30 H95 V330" stroke="#2FA8DE" stroke-width="2"/>
+        <path d="M22 70 H70 V520" stroke="#2FA8DE" stroke-width="2" opacity=".8"/>
+        <path d="M55 280 V740 H20" stroke="#2FA8DE" stroke-width="2" opacity=".7"/>
+        <path d="M95 420 V880" stroke="#2FA8DE" stroke-width="2" opacity=".55"/>
+        <circle cx="40" cy="30" r="5" fill="#6CD3FF"/>
+        <circle cx="20" cy="740" r="5" fill="#6CD3FF"/>
+        <circle cx="95" cy="880" r="5" fill="#6CD3FF"/>
+      </svg>
+      <div class="wrap" style="width:100%">
+        <div class="split">
+          <div class="hero-copy">
+            <p class="eyebrow">Hablemos</p>
+            <h1>Conectamos<br>soluciones,<br><span class="hl">atendemos<br>personas</span></h1>
+            <p class="lead">Nuestro equipo está listo para escuchar tu solicitud y darle el seguimiento que necesita.</p>
+            <div class="contact-list">
+              <a class="contact-item" href="tel:+50262067418">
+                <span class="bubble">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3h3l1.5 4-2 1.4a12 12 0 0 0 5.6 5.6L16 12l4 1.5v3a2 2 0 0 1-2.2 2C10.6 18 6 13.4 4.5 5.2A2 2 0 0 1 6.5 3z"/></svg>
+                </span>
+                <span>6206-7418</span>
+              </a>
+              <a class="contact-item mail" href="mailto:jjdseisa@gmail.com">
+                <span class="bubble">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M3 7l9 6 9-6"/></svg>
+                </span>
+                <span>jjdseisa@gmail.com</span>
+              </a>
+              <span class="contact-item">
+                <span class="bubble">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.5s7-6.1 7-11.1a7 7 0 1 0-14 0c0 5 7 11.1 7 11.1z"/><circle cx="12" cy="10" r="2.8"/></svg>
+                </span>
+                <span>Villa Nueva, Guatemala</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="panel">
+            <svg class="circuit circuit-corner" viewBox="0 0 170 200" fill="none" aria-hidden="true">
+              <path d="M120 20h30v40" stroke="#F0A6A3" stroke-width="1.6"/>
+              <path d="M100 40h26v50" stroke="#F0A6A3" stroke-width="1.6" opacity=".8"/>
+              <circle cx="120" cy="20" r="4.5" stroke="#E3453F" stroke-width="2" fill="#fff"/>
+            </svg>
+            <h2>Envíanos un mensaje</h2>
+            <p class="sub">Completa el formulario y nos pondremos en contacto contigo.</p>
+
+            <form id="formContacto" novalidate>
+              <div class="grid2">
+                <div class="field" id="f-nombre">
+                  <label for="nombre">Nombre completo</label>
+                  <input type="text" id="nombre" name="nombre" placeholder="Escribe tu nombre completo" autocomplete="name">
+                  <span class="msg-error">Escribe tu nombre completo.</span>
+                </div>
+                <div class="field" id="f-correo">
+                  <label for="correo">Correo electrónico</label>
+                  <input type="email" id="correo" name="correo" placeholder="Escribe tu correo electrónico" autocomplete="email">
+                  <span class="msg-error">Escribe un correo válido, por ejemplo nombre@correo.com.</span>
+                </div>
+                <div class="field" id="f-telefono">
+                  <label for="telefono">Teléfono</label>
+                  <input type="tel" id="telefono" name="telefono" placeholder="Escribe tu número de teléfono" autocomplete="tel" inputmode="tel">
+                  <span class="msg-error">Escribe un teléfono de 8 dígitos.</span>
+                </div>
+                <div class="field" id="f-asunto">
+                  <label for="asunto">Asunto</label>
+                  <input type="text" id="asunto" name="asunto" placeholder="Escribe el asunto">
+                  <span class="msg-error">Indica el asunto de tu mensaje.</span>
+                </div>
+              </div>
+              <div class="field" id="f-mensaje">
+                <label for="mensaje">Mensaje</label>
+                <textarea id="mensaje" name="mensaje" placeholder="Cuéntanos cómo podemos ayudarte..."></textarea>
+                <span class="msg-error">Cuéntanos cómo podemos ayudarte (mínimo 10 caracteres).</span>
+              </div>
+              <button class="btn-send" type="submit">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linejoin="round"><path d="M21.5 2.5L2.5 10l7.5 3 3 7.5 8.5-18z"/><path d="M10 13l4.5-4.5"/></svg>
+                Enviar mensaje
+              </button>
+            </form>
+
+            <div class="address">
+              <span class="bubble">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.5s7-6.1 7-11.1a7 7 0 1 0-14 0c0 5 7 11.1 7 11.1z"/><circle cx="12" cy="10" r="2.8"/></svg>
+              </span>
+              <span>11 avenida 4-41 A, zona 5<br>Local 23, Plaza Prisma, Villa Nueva</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== LOGIN ===================== -->
+  <section class="page" id="login">
+    <div class="hero">
+      <div class="hero-photo"></div>
+      <div class="hero-veil"></div>
+      <svg class="circuit circuit-left" viewBox="0 0 150 900" fill="none" aria-hidden="true">
+        <path d="M30 40h60l20-20h40" stroke="#2FA8DE" stroke-width="2"/>
+        <path d="M14 100h60l20-20" stroke="#2FA8DE" stroke-width="2" opacity=".8"/>
+        <path d="M40 200v560l-20 20" stroke="#2FA8DE" stroke-width="2" opacity=".6"/>
+        <path d="M100 260v600" stroke="#2FA8DE" stroke-width="2" opacity=".45"/>
+        <circle cx="30" cy="40" r="5" fill="#6CD3FF"/>
+        <circle cx="14" cy="100" r="5" fill="#E3453F"/>
+        <circle cx="20" cy="780" r="5" fill="#6CD3FF"/>
+      </svg>
+      <div class="wrap" style="width:100%">
+        <div class="split">
+          <div class="hero-copy">
+            <p class="eyebrow">SICORP—SEISA</p>
+            <h1>Control inteligente<br>para una operación<br><span class="hl">más eficiente</span></h1>
+            <p class="lead">Inventario, Personal y nómina en un solo lugar</p>
+          </div>
+
+          <div class="panel">
+            <img class="logo" src="img/logonegro.png" alt="SEISA">
+            <h2>Bienvenido</h2>
+            <p class="sub">Ingresa tus credenciales para continuar</p>
+
+            <form id="formLogin" novalidate>
+              <div class="login-alert" id="loginAlert" role="status"></div>
+              <div class="input-icon" id="l-correo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#1F7FD0" stroke-width="1.8" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M3 7l9 6 9-6"/></svg>
+                <input type="email" id="loginCorreo" placeholder="Correo electrónico" autocomplete="username">
+              </div>
+              <div class="input-icon" id="l-pass">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#1F7FD0" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.6" fill="#1F7FD0" stroke="none"/></svg>
+                <input type="password" id="loginPass" placeholder="Contraseña" autocomplete="current-password">
+              </div>
+              <div class="login-row">
+                <label class="remember"><input type="checkbox" id="recordar"> Recordar</label>
+                <button type="button" class="link-blue" id="olvide">¿Olvidaste tu contraseña?</button>
+              </div>
+              <button class="btn-enter" type="submit">Ingresar</button>
+            </form>
+
+            <div class="secure">
+              <span class="row">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#1F7FD0"><path d="M12 2l8 3.5v6c0 5-3.4 9.3-8 10.5-4.6-1.2-8-5.5-8-10.5v-6L12 2z"/><path d="M10.6 15.4l-3-3 1.4-1.4 1.6 1.6 4.4-4.4 1.4 1.4-5.8 5.8z" fill="#fff"/></svg>
+                Conexión Segura
+              </span>
+              <small>Acceso exclusivo para personal autorizado</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===================== MODAL DE ÉXITO ===================== -->
+<div class="modal-back" id="modalOk" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+  <div class="modal">
+    <svg class="check" viewBox="0 0 90 90" fill="none" aria-hidden="true">
+      <circle cx="45" cy="45" r="34" fill="#1F7FD0"/>
+      <path d="M30 46l10 10 20-22" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="74" cy="20" r="3.5" stroke="#E3453F" stroke-width="2"/>
+    </svg>
+    <h3 id="modalTitulo">¡Mensaje enviado!</h3>
+    <p>Tu mensaje fue enviado correctamente.<br>Nos pondremos en contacto contigo pronto.</p>
+    <button class="btn-send" id="cerrarModal">Entendido</button>
+  </div>
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>
