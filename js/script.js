@@ -122,25 +122,70 @@ function aviso(texto, tipo){
   alerta.className = 'login-alert show ' + tipo;
 }
 
-formLogin.addEventListener('submit', e => {
-  e.preventDefault();
-  const correoOk = emailRe.test(inCorreo.value.trim());
-  const passOk = inPass.value.length >= 6;
-  document.getElementById('l-correo').classList.toggle('error', !correoOk);
-  document.getElementById('l-pass').classList.toggle('error', !passOk);
+//AQUI ES DONDE SE ENVIA LA INFO DEL FORM A EL BACKEND
+formLogin.addEventListener('submit', async e => {
+    e.preventDefault();
 
-  if(!correoOk){ aviso('Escribe un correo válido para continuar.','bad'); inCorreo.focus(); return; }
-  if(!passOk){ aviso('La contraseña debe tener al menos 6 caracteres.','bad'); inPass.focus(); return; }
+    const usuario = inCorreo.value.trim();
+    const contraseña = inPass.value;
 
-  try{
-    if(recordar.checked) localStorage.setItem('seisa_correo', inCorreo.value.trim());
-    else localStorage.removeItem('seisa_correo');
-  }catch(err){}
+    
+    const passOk = contraseña.length >= 1;
 
-  /* Aquí conectas tu autenticación real (PHP, Node, Firebase, etc.) */
-  aviso('Credenciales verificadas. Abriendo SICORP…','ok');
-  console.log('Login:', { correo: inCorreo.value.trim(), recordar: recordar.checked });
-  setTimeout(() => { window.location.href = 'panel.html'; }, 700);
+    document.getElementById('l-pass')
+        .classList.toggle('error', !passOk);
+
+    if (!passOk) {
+        aviso('La contraseña debe tener al menos 1 caracter.', 'bad');
+        inPass.focus();
+        return;
+    }
+
+    try {
+
+        if (recordar.checked) {
+            localStorage.setItem('seisa_correo', usuario);
+        } else {
+            localStorage.removeItem('seisa_correo');
+        }
+
+        aviso('Verificando credenciales...', 'ok');
+
+        const respuesta = await fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                usuario: usuario,
+                contraseña: contraseña
+            })
+        });
+
+        const datos = await respuesta.json();
+
+        if (!respuesta.ok) {
+            aviso(datos.mensaje || 'Usuario o contraseña incorrectos.', 'bad');
+            return;
+        }
+
+        if (datos.exito) {
+            aviso('Credenciales verificadas. Abriendo SICORP...', 'ok');
+
+            setTimeout(() => {
+                window.location.href = '/inicio';
+            }, 700);
+        }
+
+    } catch (error) {
+
+        console.error('Error comunicando con el servidor:', error);
+
+        aviso(
+            'No se pudo conectar con el servidor.',
+            'bad'
+        );
+    }
 });
 
 document.getElementById('olvide').addEventListener('click', () => {
