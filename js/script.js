@@ -111,7 +111,7 @@ const inCorreo = document.getElementById('loginCorreo');
 const inPass = document.getElementById('loginPass');
 const recordar = document.getElementById('recordar');
 
-/* Recuperar el correo guardado, si el navegador lo permite */
+/*Recuperar el correo guardado, si el navegador lo permite */
 try{
   const guardado = localStorage.getItem('seisa_correo');
   if(guardado){ inCorreo.value = guardado; recordar.checked = true; }
@@ -122,7 +122,7 @@ function aviso(texto, tipo){
   alerta.className = 'login-alert show ' + tipo;
 }
 
-//AQUI ES DONDE SE ENVIA LA INFO DEL FORM A EL BACKEND
+//IMPORTANTE: AQUI ES DONDE SE ENVIA LA INFO DEL FORM A EL BACKEND
 formLogin.addEventListener('submit', async e => {
     e.preventDefault();
 
@@ -130,7 +130,7 @@ formLogin.addEventListener('submit', async e => {
     const contraseña = inPass.value;
 
     
-    const passOk = contraseña.length >= 1;
+    const passOk = contraseña.length >= 1; //conprobacion que quedó del login anterior
 
     document.getElementById('l-pass')
         .classList.toggle('error', !passOk);
