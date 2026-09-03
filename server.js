@@ -44,6 +44,8 @@ async function conectarBD() {
 
 app.use(express.json());
 
+//Para usar después y encriptar la sesión de ser necesario
+/*
 app.use(
     session({
         secret: "CAMBIA-ESTA-CLAVE-POR-UNA-LARGA-Y-ALEATORIA",
@@ -54,14 +56,16 @@ app.use(
         }
     })
 );
+*/
 
-// 1. Serve static assets directly from the project root folder
+//1. busca en el folder root
 app.use(express.static(__dirname)); 
 
-// 2. Serve the index.html file from the root folder
+//2. para que al entrar por primera vez "sirva" el index.html
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
+
 // =====================================
 // LOGIN
 // =====================================
@@ -165,6 +169,8 @@ app.listen(PORT, async () => {
     await conectarBD();
 });
 */
+
+//0.0.0.0 se usa para que escuche a todas las direcciones ipv4 de la red LAN
 app.listen(PORT, '0.0.0.0', async () => {
     console.log(`Servidor ejecutándose en http://0.0.0.0:${PORT}`);
     await conectarBD();
