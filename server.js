@@ -44,11 +44,10 @@ async function conectarBD() {
 
 app.use(express.json());
 
-//Para usar después y encriptar la sesión de ser necesario
-/*
+//Para crear la sesión
 app.use(
     session({
-        secret: "CAMBIA-ESTA-CLAVE-POR-UNA-LARGA-Y-ALEATORIA",
+        secret: "CLAVE",
         resave: false,
         saveUninitialized: false,
         cookie: {
@@ -56,7 +55,6 @@ app.use(
         }
     })
 );
-*/
 
 //1. busca en el folder root
 app.use(express.static(__dirname)); 
