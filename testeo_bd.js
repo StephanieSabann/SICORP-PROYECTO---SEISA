@@ -19,7 +19,7 @@ async function probarConexion() {
 
         const pool = await sql.connect(config);
 
-        console.log("✅ Conexión exitosa a SQL Server");
+        console.log("Conexión exitosa a SQL Server");
 
         const resultado = await pool.request().query(`
             SELECT
@@ -35,7 +35,7 @@ async function probarConexion() {
         await pool.close();
 
     } catch (error) {
-        console.error("❌ Error de conexión:");
+        console.error("Error de conexión:");
         console.error(error);
     }
 }
