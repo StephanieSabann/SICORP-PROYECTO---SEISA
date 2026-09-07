@@ -42,9 +42,16 @@ async function conectarBD() {
 // MIDDLEWARE
 // =====================================
 
+// Permite recibir JSON desde fetch()
 app.use(express.json());
 
-//Para crear la sesión
+// Permite recibir datos enviados desde formularios
+app.use(express.urlencoded({ extended: true }));
+
+// =====================================
+// SESIONES
+// =====================================
+
 app.use(
     session({
         secret: "CLAVE",
@@ -56,12 +63,25 @@ app.use(
     })
 );
 
-//1. busca en el folder root
-app.use(express.static(__dirname)); 
+// =====================================
+// ARCHIVOS ESTÁTICOS
+// =====================================
 
-//2. para que al entrar por primera vez "sirva" el index.html
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+// Permite acceder a:
+// /index.html
+// /login.html
+// /inicio.html
+// /css/...
+// /js/...
+// /img/...
+app.use(express.static(__dirname));
+
+// =====================================
+// PÁGINA INICIAL
+// =====================================
+
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
 });
 
 // =====================================
@@ -72,6 +92,7 @@ app.post("/login", async (req, res) => {
 
     const { usuario, contraseña } = req.body;
 
+    // Validar datos recibidos
     if (!usuario || !contraseña) {
         return res.status(400).json({
             exito: false,
@@ -79,39 +100,54 @@ app.post("/login", async (req, res) => {
         });
     }
 
+    // Comprobar que la BD esté conectada
+    if (!pool) {
+        return res.status(500).json({
+            exito: false,
+            mensaje: "La base de datos no está disponible."
+        });
+    }
+
     try {
 
         const resultado = await pool
             .request()
-            .input("usuario", sql.VarChar(100), usuario)
+            .input("usuario", sql.VarChar(80), usuario)
             .input("contraseña", sql.VarChar(255), contraseña)
             .query(`
-                SELECT usuario
+                SELECT id_credencial, usuario
                 FROM credenciales
                 WHERE usuario = @usuario
                 AND contrasenia = HASHBYTES('SHA2_512', @contraseña)
             `);
 
+        // Usuario o contraseña incorrectos
         if (resultado.recordset.length === 0) {
-
             return res.status(401).json({
                 exito: false,
                 mensaje: "Usuario o contraseña incorrectos."
             });
         }
 
-        // Guardamos al usuario en la sesión
-        req.session.usuario = resultado.recordset[0].usuario;
+        // Usuario encontrado
+        const usuarioBD = resultado.recordset[0];
 
-        res.json({
-            exito: true
+        // Guardamos información en la sesión
+        req.session.usuario = usuarioBD.usuario;
+        req.session.id_credencial = usuarioBD.id_credencial;
+
+        console.log("Usuario inició sesión:", usuarioBD.usuario);
+
+        return res.json({
+            exito: true,
+            mensaje: "Inicio de sesión correcto."
         });
 
     } catch (error) {
 
         console.error("Error de login:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
             exito: false,
             mensaje: "Error interno del servidor."
         });
@@ -124,22 +160,23 @@ app.post("/login", async (req, res) => {
 
 function requiereLogin(req, res, next) {
 
-    if (req.session.usuario) {
+    if (req.session && req.session.usuario) {
         next();
     } else {
-        res.redirect("/login.html");
+        res.redirect("/");
     }
 }
 
 // =====================================
-// PÁGINA PROTEGIDA
+// PÁGINA PROTEGIDA: INICIO
 // =====================================
 
 app.get("/inicio", requiereLogin, (req, res) => {
 
-    res.sendFile(path.join(__dirname, 'inicio.html'));
+    res.sendFile(path.join(__dirname, "inicio.html"));
 
 });
+
 // =====================================
 // CERRAR SESIÓN
 // =====================================
@@ -149,27 +186,25 @@ app.get("/logout", (req, res) => {
     req.session.destroy((error) => {
 
         if (error) {
-            return res.status(500).send("No se pudo cerrar la sesión.");
+            console.error("Error destruyendo sesión:", error);
+
+            return res.status(500).send(
+                "No se pudo cerrar la sesión."
+            );
         }
 
-        res.redirect("/login.html");
+        res.redirect("/");
     });
 });
 
 // =====================================
 // INICIAR SERVIDOR
 // =====================================
-/*
-app.listen(PORT, async () => {
+
+app.listen(PORT, "0.0.0.0", async () => {
 
     console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
 
     await conectarBD();
-});
-*/
 
-//0.0.0.0 se usa para que escuche a todas las direcciones ipv4 de la red LAN
-app.listen(PORT, '0.0.0.0', async () => {
-    console.log(`Servidor ejecutándose en http://0.0.0.0:${PORT}`);
-    await conectarBD();
 });

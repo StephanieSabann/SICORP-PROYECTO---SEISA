@@ -260,10 +260,6 @@
 
                 <select id="filtroRol" aria-label="Filtrar por rol">
                   <option value="">Todos los roles</option>
-                  <option>Administrador</option>
-                  <option>Seguridad Industrial</option>
-                  <option>Técnico</option>
-                  <option>Auxiliares</option>
                 </select>
 
                 <select id="filtroEstado" aria-label="Filtrar por estado">
@@ -315,32 +311,26 @@
             <div class="rejilla">
               <label class="campo">
                 <span>Empleado vinculado</span>
+
                 <select id="empleado">
-                  <option value="">Seleccionar empleados</option>
-                  <option>Andrés López</option>
-                  <option>Carlos Méndez</option>
-                  <option>Jose Ramiréz</option>
-                  <option>Luis García</option>
-                  <option>Mario Hernández</option>
+                  <option value="">Seleccionar empleado</option>
                 </select>
               </label>
 
               <label class="campo">
                 <span>Nombre completo</span>
-                <input type="text" id="nombre" placeholder="Nombre y apellido">
-                <em class="error">Escribe el nombre completo.</em>
+                <input
+                  type="text"
+                  id="nombre"
+                  placeholder="Se cargará automáticamente"
+                  readonly
+                >
               </label>
 
               <label class="campo">
                 <span>Usuario</span>
                 <input type="text" id="usuario" placeholder="nombre.apellido" autocomplete="off">
                 <em class="error">El usuario debe tener al menos 4 caracteres y no repetirse.</em>
-              </label>
-
-              <label class="campo">
-                <span>Correo electronico</span>
-                <input type="email" id="correo" placeholder="usuario@seisa.com.gt" autocomplete="off">
-                <em class="error">Escribe un correo válido.</em>
               </label>
 
               <label class="campo">
@@ -384,19 +374,12 @@
 
             <label class="campo ancho">
               <select id="rol">
-                <option>Administrador</option>
-                <option>Seguridad Industrial</option>
-                <option selected>Técnico</option>
-                <option>Auxiliares</option>
+                <option value="">Seleccionar rol</option>
               </select>
             </label>
 
-            <div class="roles">
-              <button type="button" class="rol-chip" data-rol="Administrador">Administrador</button>
-              <button type="button" class="rol-chip" data-rol="Seguridad Industrial">Seguridad Industrial</button>
-              <button type="button" class="rol-chip is-on" data-rol="Técnico">Técnico</button>
-              <button type="button" class="rol-chip" data-rol="Auxiliares">Auxiliares</button>
-            </div>
+            <div class="roles" id="listaRoles"></div>
+            
             <p class="nota">El rol sugiere los accesos principales pero pueden modificarse</p>
 
             <h2 class="cabecera">
@@ -407,13 +390,7 @@
               Accesos al sistema
             </h2>
 
-            <div class="accesos">
-              <label class="acceso"><input type="checkbox" value="Empleados"><span>Empleados</span></label>
-              <label class="acceso"><input type="checkbox" value="Inventario"><span>Inventario</span></label>
-              <label class="acceso"><input type="checkbox" value="Nóminas"><span>Nóminas</span></label>
-              <label class="acceso"><input type="checkbox" value="Reportes"><span>Reportes</span></label>
-              <label class="acceso"><input type="checkbox" value="Usuarios"><span>Usuarios</span></label>
-            </div>
+            <div class="accesos" id="listaAccesos"></div>
 
             <div class="acciones-form">
               <button type="button" class="btn-linea" id="btnCancelar">Cancelar</button>

@@ -2,38 +2,57 @@
    SICORP — SEISA · lógica del panel
    ============================================================ */
 
-const LLAVE = 'sicorp_usuarios';
-const sinMovimiento = matchMedia('(prefers-reduced-motion:reduce)').matches;
+const sinMovimiento =
+  matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* Accesos que sugiere cada rol */
-const ACCESOS_POR_ROL = {
-  'Administrador': ['Empleados', 'Inventario', 'Nóminas', 'Reportes', 'Usuarios'],
-  'Seguridad Industrial': ['Inventario'],
-  'Técnico': ['Inventario'],
-  'Auxiliares': ['Inventario']
-};
+let usuarios = [];
+let empleados = [];
+let roles = [];
+let accesos = [];
 
-const SEMILLA = [
-  { id:1, nombre:'Jonathan',        usuario:'jonathan',   correo:'jonathan@seisa.com.gt',  rol:'Administrador',        estado:'activo',   accesos:['Empleados','Inventario','Nóminas','Reportes','Usuarios'] },
-  { id:2, nombre:'Luis García',     usuario:'l.garcia',   correo:'l.garcia@seisa.com.gt',  rol:'Seguridad Industrial', estado:'activo',   accesos:['Inventario'] },
-  { id:3, nombre:'Andrés López',    usuario:'a.lopez',    correo:'a.lopez@seisa.com.gt',   rol:'Técnico',              estado:'activo',   accesos:['Inventario'] },
-  { id:4, nombre:'Mario Hernández', usuario:'m.hernandez',correo:'m.hernandez@seisa.com.gt',rol:'Técnico',             estado:'activo',   accesos:['Inventario'] },
-  { id:5, nombre:'Jose Ramiréz',    usuario:'j.ramirez',  correo:'j.ramirez@seisa.com.gt', rol:'Auxiliares',           estado:'activo',   accesos:['Inventario'] },
-  { id:6, nombre:'Carlos Méndez',   usuario:'c.mendez',   correo:'c.mendez@seisa.com.gt',  rol:'Técnico',              estado:'inactivo', accesos:['Inventario'] }
-];
+let editandoId = null;
+let pendiente = null;
 
-let usuarios = cargar();
-let editandoId = null;   /* null = estamos creando */
+async function cargarUsuarios() {
+  try {
+    const respuesta = await api('/api/credenciales');
 
-function cargar(){
-  try{
-    const guardado = localStorage.getItem(LLAVE);
-    if(guardado) return JSON.parse(guardado);
-  }catch(e){}
-  return SEMILLA.map(u => ({...u}));
+    usuarios = respuesta.datos || [];
+
+    pintarUsuarios();
+
+  } catch (error) {
+    console.error('Error cargando usuarios:', error);
+    avisar('No se pudieron cargar los usuarios.');
+  }
 }
-function guardar(){
-  try{ localStorage.setItem(LLAVE, JSON.stringify(usuarios)); }catch(e){}
+
+async function cargarEmpleados() {
+  try {
+    const respuesta = await api('/api/empleados');
+
+    empleados = respuesta.datos || [];
+
+    const select = document.getElementById('empleado');
+
+    select.innerHTML =
+      '<option value="">Seleccionar empleado</option>';
+
+    empleados.forEach(empleado => {
+      const option = document.createElement('option');
+
+      option.value = empleado.codigo_empleado;
+
+      option.textContent =
+        `${empleado.nombre} ${empleado.apellido}`;
+
+      select.appendChild(option);
+    });
+
+  } catch (error) {
+    console.error('Error cargando empleados:', error);
+    avisar('No se pudieron cargar los empleados.');
+  }
 }
 
 /* ============================================================
@@ -193,11 +212,6 @@ function contar(el, meta){
   c.addEventListener('change', () => pintarUsuarios());
 });
 
-/* ============================================================
-   Acciones de cada fila
-   ============================================================ */
-let pendiente = null;   /* {accion, id} a confirmar */
-
 function accionFila(accion, id){
   const u = usuarios.find(x => x.id === id);
   if(!u) return;
@@ -245,6 +259,143 @@ document.getElementById('btnNo').addEventListener('click', () => { pendiente = n
 /* ============================================================
    Formulario de usuario
    ============================================================ */
+async function cargarRoles() {
+  try {
+    const respuesta = await api('/api/roles');
+
+    roles = respuesta.datos || [];
+
+    const select = document.getElementById('rol');
+    const contenedor = document.getElementById('listaRoles');
+    const filtro = document.getElementById('filtroRol');
+
+    select.innerHTML =
+      '<option value="">Seleccionar rol</option>';
+
+    filtro.innerHTML =
+      '<option value="">Todos los roles</option>';
+
+    contenedor.innerHTML = '';
+
+    roles.forEach(rol => {
+
+      const option = document.createElement('option');
+
+      option.value = rol.id_rol;
+      option.textContent = rol.nombre;
+
+      select.appendChild(option);
+
+      const opcionFiltro =
+        document.createElement('option');
+
+      opcionFiltro.value = rol.nombre;
+      opcionFiltro.textContent = rol.nombre;
+
+      filtro.appendChild(opcionFiltro);
+
+      const boton =
+        document.createElement('button');
+
+      boton.type = 'button';
+      boton.className = 'rol-chip';
+      boton.dataset.idRol = rol.id_rol;
+      boton.textContent = rol.nombre;
+
+      boton.addEventListener('click', () => {
+        campos.rol.value = rol.id_rol;
+        marcarRol(rol.id_rol);
+      });
+
+      contenedor.appendChild(boton);
+    });
+
+  } catch (error) {
+    console.error('Error cargando roles:', error);
+    avisar('No se pudieron cargar los roles.');
+  }
+}
+
+async function cargarAccesos() {
+  try {
+    const respuesta = await api('/api/accesos');
+
+    accesos = respuesta.datos || [];
+
+    const contenedor =
+      document.getElementById('listaAccesos');
+
+    contenedor.innerHTML = '';
+
+    accesos.forEach(acceso => {
+
+      const label =
+        document.createElement('label');
+
+      label.className = 'acceso';
+
+      label.innerHTML = `
+        <input
+          type="checkbox"
+          value="${acceso.id_acceso}"
+        >
+        <span>${escapar(acceso.nombre)}</span>
+      `;
+
+      contenedor.appendChild(label);
+    });
+
+  } catch (error) {
+    console.error('Error cargando accesos:', error);
+    avisar('No se pudieron cargar los accesos.');
+  }
+}
+
+async function marcarRol(idRol) {
+
+  document.querySelectorAll('.rol-chip').forEach(chip => {
+    chip.classList.toggle(
+      'is-on',
+      Number(chip.dataset.idRol) === Number(idRol)
+    );
+  });
+
+  if (!idRol) {
+    cajasAcceso().forEach(c => {
+      c.checked = false;
+    });
+
+    return;
+  }
+
+  try {
+
+    const respuesta =
+      await api(`/api/roles/${idRol}/accesos`);
+
+    const accesosRol = respuesta.datos || [];
+
+    const idsAcceso =
+      accesosRol.map(a => Number(a.id_acceso));
+
+    cajasAcceso().forEach(c => {
+      c.checked =
+        idsAcceso.includes(Number(c.value));
+    });
+
+  } catch (error) {
+
+    console.error(
+      'Error cargando accesos del rol:',
+      error
+    );
+
+    avisar(
+      'No se pudieron cargar los accesos del rol.'
+    );
+  }
+}
+
 const form = document.getElementById('formUsuario');
 const campos = {
   empleado: document.getElementById('empleado'),
@@ -284,9 +435,6 @@ function abrirFormulario(u){
     cajasAcceso().forEach(c => {
       c.checked = u.accesos.includes(c.value);
     });
-  }else{
-    campos.rol.value = 'Técnico';
-    marcarRol('Técnico', true);
   }
   irA('nuevo');
   campos.nombre.focus();
@@ -301,20 +449,46 @@ campos.nombre.addEventListener('input', () => {
 });
 campos.usuario.addEventListener('input', () => campos.usuario.dataset.tocado = '1');
 campos.empleado.addEventListener('change', () => {
-  if(campos.empleado.value){
-    campos.nombre.value = campos.empleado.value;
-    campos.nombre.dispatchEvent(new Event('input'));
+
+  const codigo = Number(campos.empleado.value);
+
+  const empleado = empleados.find(
+    e => Number(e.codigo_empleado) === codigo
+  );
+
+  if (!empleado) {
+    campos.nombre.value = '';
+    return;
+  }
+
+  campos.nombre.value =
+    `${empleado.nombre} ${empleado.apellido}`;
+
+  if (!campos.usuario.dataset.tocado) {
+    campos.usuario.value =
+      generarUsuario(empleado.nombre, empleado.apellido);
   }
 });
+
+function generarUsuario(nombre, apellido) {
+  const nombreLimpio = quitarTildes(nombre.trim());
+  const apellidoLimpio = quitarTildes(apellido.trim());
+
+  if (!nombreLimpio || !apellidoLimpio) {
+    return '';
+  }
+
+  return (
+    nombreLimpio.charAt(0) +
+    '.' +
+    apellidoLimpio
+  ).toLowerCase();
+}
+
 function quitarTildes(t){
   return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
 }
 
-/* Rol: el select y los tres botones van sincronizados */
-document.querySelectorAll('.rol-chip').forEach(chip => {
-  chip.addEventListener('click', () => { campos.rol.value = chip.dataset.rol; marcarRol(chip.dataset.rol, true); });
-});
-campos.rol.addEventListener('change', () => marcarRol(campos.rol.value, true));
 
 function marcarRol(rol, aplicarAccesos){
   document.querySelectorAll('.rol-chip').forEach(c => c.classList.toggle('is-on', c.dataset.rol === rol));
@@ -467,6 +641,26 @@ window.addEventListener('hashchange', () => {
   const destino = location.hash.slice(1);
   if(['inicio','usuarios','nuevo'].includes(destino)) irA(destino);
 });
+
+
+//FUNCION PARA COMUNICARSE CON EL BACKEND
+async function api(url, opciones = {}) {
+  const respuesta = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    ...opciones
+  });
+
+  const datos = await respuesta.json();
+
+  if (!respuesta.ok) {
+    throw new Error(datos.mensaje || 'Error en la solicitud.');
+  }
+
+  return datos;
+}
+
 
 /* ============================================================
    Arranque
