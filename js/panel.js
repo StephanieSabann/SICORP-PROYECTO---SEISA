@@ -395,7 +395,6 @@ async function marcarRol(idRol) {
     );
   }
 }
-cargarEmpleados();
 const form = document.getElementById('formUsuario');
 const campos = {
   empleado: document.getElementById('empleado'),
@@ -417,6 +416,11 @@ document.getElementById('btnCancelar').addEventListener('click', () => {
 
 function abrirFormulario(u){
   editandoId = u ? u.id : null;
+
+  if (!empleados.length) {
+    cargarEmpleados();
+  }
+
   limpiarErrores();
   form.reset();
 

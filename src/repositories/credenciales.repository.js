@@ -1,4 +1,4 @@
-const { sql, poolPromise } = require("../config/database");
+const { sql, obtenerPool } = require("../config/database");
 
 
 // ==========================================
@@ -7,7 +7,7 @@ const { sql, poolPromise } = require("../config/database");
 
 async function obtenerTodas() {
 
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
 
     const resultado = await pool
         .request()
@@ -31,7 +31,7 @@ async function obtenerTodas() {
 
 async function obtenerPorId(id) {
 
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
 
     const resultado = await pool
         .request()
@@ -56,7 +56,7 @@ async function obtenerPorId(id) {
 
 async function obtenerPorUsuario(usuario) {
 
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
 
     const resultado = await pool
         .request()
@@ -81,7 +81,7 @@ async function obtenerPorUsuario(usuario) {
 
 async function obtenerPorCodigoEmpleado(codigoEmpleado) {
 
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
 
     const resultado = await pool
         .request()
@@ -106,7 +106,7 @@ async function obtenerPorCodigoEmpleado(codigoEmpleado) {
 
 async function crear(datos) {
 
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
 
     const resultado = await pool
         .request()
@@ -165,7 +165,7 @@ async function crear(datos) {
 
 async function actualizar(id, datos) {
 
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
 
     const resultado = await pool
         .request()
@@ -216,7 +216,7 @@ async function actualizar(id, datos) {
 
 async function actualizarContrasenia(id, contrasenia) {
 
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
 
     const resultado = await pool
         .request()
@@ -255,7 +255,7 @@ async function actualizarContrasenia(id, contrasenia) {
 
 async function eliminar(id) {
 
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
 
     const resultado = await pool
         .request()

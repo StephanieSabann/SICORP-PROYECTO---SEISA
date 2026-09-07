@@ -19,18 +19,27 @@ const dbConfig = {
     }
 };
 
-const poolPromise = new sql.ConnectionPool(dbConfig)
-    .connect()
-    .then(pool => {
-        console.log("Conectado a SQL Server");
-        return pool;
-    })
-    .catch(error => {
-        console.error("Error conectando a SQL Server:", error);
-        throw error;
-    });
+let poolPromise;
+
+function obtenerPool() {
+    if (!poolPromise) {
+        poolPromise = new sql.ConnectionPool(dbConfig)
+            .connect()
+            .then(pool => {
+                console.log("Conectado a SQL Server");
+                return pool;
+            })
+            .catch(error => {
+                poolPromise = undefined;
+                console.error("Error conectando a SQL Server:", error);
+                throw error;
+            });
+    }
+
+    return poolPromise;
+}
 
 module.exports = {
     sql,
-    poolPromise
+    obtenerPool
 };
