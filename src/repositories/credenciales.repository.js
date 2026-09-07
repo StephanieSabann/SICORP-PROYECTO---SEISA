@@ -15,6 +15,7 @@ async function obtenerTodas() {
             SELECT
                 id_credencial,
                 codigo_empleado,
+                Activo,
                 usuario
             FROM credenciales
             ORDER BY id_credencial DESC
@@ -39,6 +40,7 @@ async function obtenerPorId(id) {
             SELECT
                 id_credencial,
                 codigo_empleado,
+                Activo,
                 usuario
             FROM credenciales
             WHERE id_credencial = @id_credencial
@@ -63,6 +65,7 @@ async function obtenerPorUsuario(usuario) {
             SELECT
                 id_credencial,
                 codigo_empleado,
+                Activo,
                 usuario
             FROM credenciales
             WHERE usuario = @usuario
@@ -87,6 +90,7 @@ async function obtenerPorCodigoEmpleado(codigoEmpleado) {
             SELECT
                 id_credencial,
                 codigo_empleado,
+                Activo,
                 usuario
             FROM credenciales
             WHERE codigo_empleado = @codigo_empleado
@@ -112,6 +116,11 @@ async function crear(datos) {
             datos.codigo_empleado
         )
         .input(
+            "Activo",
+            sql.Bit,
+            datos.Activo === undefined ? true : datos.Activo
+        )
+        .input(
             "usuario",
             sql.VarChar(80),
             datos.usuario
@@ -125,12 +134,14 @@ async function crear(datos) {
             INSERT INTO credenciales
             (
                 codigo_empleado,
+                Activo,
                 usuario,
                 contrasenia
             )
             VALUES
             (
                 @codigo_empleado,
+                @Activo,
                 @usuario,
                 HASHBYTES('SHA2_512', @contrasenia)
             );
@@ -138,6 +149,7 @@ async function crear(datos) {
             SELECT
                 id_credencial,
                 codigo_empleado,
+                Activo,
                 usuario
             FROM credenciales
             WHERE id_credencial = SCOPE_IDENTITY();
@@ -168,6 +180,11 @@ async function actualizar(id, datos) {
             datos.codigo_empleado
         )
         .input(
+            "Activo",
+            sql.Bit,
+            datos.Activo === undefined ? null : datos.Activo
+        )
+        .input(
             "usuario",
             sql.VarChar(80),
             datos.usuario
@@ -176,12 +193,14 @@ async function actualizar(id, datos) {
             UPDATE credenciales
             SET
                 codigo_empleado = @codigo_empleado,
+                Activo = COALESCE(@Activo, Activo),
                 usuario = @usuario
             WHERE id_credencial = @id_credencial;
 
             SELECT
                 id_credencial,
                 codigo_empleado,
+                Activo,
                 usuario
             FROM credenciales
             WHERE id_credencial = @id_credencial;
@@ -199,7 +218,7 @@ async function actualizarContrasenia(id, contrasenia) {
 
     const pool = await poolPromise;
 
-    await pool
+    const resultado = await pool
         .request()
         .input(
             "id_credencial",
@@ -218,8 +237,15 @@ async function actualizarContrasenia(id, contrasenia) {
                     'SHA2_512',
                     @contrasenia
                 )
+            OUTPUT
+                INSERTED.id_credencial,
+                INSERTED.codigo_empleado,
+                INSERTED.Activo,
+                INSERTED.usuario
             WHERE id_credencial = @id_credencial
         `);
+
+    return resultado.recordset[0];
 }
 
 
@@ -240,10 +266,15 @@ async function eliminar(id) {
         )
         .query(`
             DELETE FROM credenciales
+            OUTPUT
+                DELETED.id_credencial,
+                DELETED.codigo_empleado,
+                DELETED.Activo,
+                DELETED.usuario
             WHERE id_credencial = @id_credencial
         `);
 
-    return resultado.rowsAffected[0];
+    return resultado.recordset[0];
 }
 
 

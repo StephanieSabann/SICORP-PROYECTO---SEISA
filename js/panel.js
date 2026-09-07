@@ -395,7 +395,7 @@ async function marcarRol(idRol) {
     );
   }
 }
-
+cargarEmpleados();
 const form = document.getElementById('formUsuario');
 const campos = {
   empleado: document.getElementById('empleado'),
