@@ -1,7 +1,7 @@
-const { sql, poolPromise } = require("../config/database");
+const { sql, obtenerPool } = require("../config/database");
 
 async function obtenerTodosLosRoles() {
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
     const resultado = await pool.request().query(`
         SELECT id_rol, nombre, descripcion
         FROM Rol
@@ -11,7 +11,7 @@ async function obtenerTodosLosRoles() {
 }
 
 async function obtenerRolPorId(id) {
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
     const resultado = await pool.request()
         .input("id_rol", sql.Int, id)
         .query(`
@@ -23,7 +23,7 @@ async function obtenerRolPorId(id) {
 }
 
 async function crearRol(datos) {
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
     const resultado = await pool.request()
         .input("nombre", sql.VarChar(100), datos.nombre)
         .input("descripcion", sql.VarChar(sql.MAX), datos.descripcion)
@@ -36,7 +36,7 @@ async function crearRol(datos) {
 }
 
 async function actualizarRol(id, datos) {
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
     const resultado = await pool.request()
         .input("id_rol", sql.Int, id)
         .input("nombre", sql.VarChar(100), datos.nombre)
@@ -51,7 +51,7 @@ async function actualizarRol(id, datos) {
 }
 
 async function eliminarRol(id) {
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
     const resultado = await pool.request()
         .input("id_rol", sql.Int, id)
         .query(`

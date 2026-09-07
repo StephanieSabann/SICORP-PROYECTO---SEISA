@@ -1,7 +1,7 @@
-const { poolPromise } = require("../config/database");
+const { obtenerPool } = require("../config/database");
 
 async function obtenerTodos() {
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
 
     const resultado = await pool.request().query(`
         SELECT

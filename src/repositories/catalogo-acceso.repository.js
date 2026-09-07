@@ -1,7 +1,7 @@
-const { sql, poolPromise } = require("../config/database");
+const { sql, obtenerPool } = require("../config/database");
 
 async function obtenerTodos() {
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
     const resultado = await pool.request().query(`
         SELECT id_acceso, nombre
         FROM Catalogo_acceso
@@ -11,7 +11,7 @@ async function obtenerTodos() {
 }
 
 async function obtenerPorId(id) {
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
     const resultado = await pool.request()
         .input("id_acceso", sql.Int, id)
         .query(`
@@ -23,7 +23,7 @@ async function obtenerPorId(id) {
 }
 
 async function crear(datos) {
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
     const resultado = await pool.request()
         .input("nombre", sql.VarChar(50), datos.nombre)
         .query(`
@@ -35,7 +35,7 @@ async function crear(datos) {
 }
 
 async function actualizar(id, datos) {
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
     const resultado = await pool.request()
         .input("id_acceso", sql.Int, id)
         .input("nombre", sql.VarChar(50), datos.nombre)
@@ -49,7 +49,7 @@ async function actualizar(id, datos) {
 }
 
 async function eliminar(id) {
-    const pool = await poolPromise;
+    const pool = await obtenerPool();
     const resultado = await pool.request()
         .input("id_acceso", sql.Int, id)
         .query(`
