@@ -5,7 +5,7 @@ async function obtenerTodosLosRoles() {
     const resultado = await pool.request().query(`
         SELECT id_rol, nombre, descripcion
         FROM Rol
-        ORDER BY id_rol DESC
+        ORDER BY id_rol ASC
     `);
     return resultado.recordset;
 }
