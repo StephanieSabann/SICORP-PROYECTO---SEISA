@@ -22,6 +22,25 @@ async function obtenerRolPorId(id) {
     return resultado.recordset[0];
 }
 
+async function obtenerAccesosPorRolId(idRol) {
+    const pool = await obtenerPool();
+
+    const resultado = await pool.request()
+        .input("id_rol", sql.Int, idRol)
+        .query(`
+            SELECT DISTINCT
+                c.id_acceso,
+                c.nombre
+            FROM Catalogo_acceso c
+            INNER JOIN rol_acceso ra
+                ON ra.id_acceso = c.id_acceso
+            WHERE ra.id_rol = @id_rol
+            ORDER BY c.nombre
+        `);
+
+    return resultado.recordset;
+}
+
 async function crearRol(datos) {
     const pool = await obtenerPool();
     const resultado = await pool.request()
@@ -65,6 +84,7 @@ async function eliminarRol(id) {
 module.exports = {
     obtenerTodosLosRoles,
     obtenerRolPorId,
+    obtenerAccesosPorRolId,
     crearRol,
     actualizarRol,
     eliminarRol

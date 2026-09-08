@@ -4,6 +4,9 @@ const session = require("express-session");
 const path = require("path");
 const empleadosRoutes = require("./src/routes/empleados.routes");
 const credencialesRoutes = require('./src/routes/credenciales.routes');
+const rolesRoutes = require("./src/routes/roles.routes");
+const accesosRoutes = require("./src/routes/accesos.routes");
+const usuariosRoutes = require("./src/routes/usuarios.routes");
 
 const app = express();
 const PORT = 3000;
@@ -53,6 +56,9 @@ app.use('/api/credenciales', credencialesRoutes);
 
 // API de empleados para los formularios del panel
 app.use("/api/empleados", empleadosRoutes);
+app.use("/api/roles", rolesRoutes);
+app.use("/api/accesos", accesosRoutes);
+app.use("/api/usuarios", usuariosRoutes);
 
 // =====================================
 // SESIONES
