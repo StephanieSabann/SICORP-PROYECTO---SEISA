@@ -8,7 +8,6 @@ const sinMovimiento =
 let usuarios = [];
 let empleados = [];
 let roles = [];
-let accesos = [];
 
 let editandoId = null;
 let pendiente = null;
@@ -134,7 +133,7 @@ function filtrados(){
   const estado = filtroEstado.value;
   return usuarios.filter(u => {
     const coincide = !texto ||
-      (u.nombre + ' ' + u.usuario + ' ' + (u.rol || '')).toLowerCase().includes(texto);
+      (u.nombre + ' ' + u.usuario + ' ' + u.rol).toLowerCase().includes(texto);
     const rolOk = !rol || u.rol.toLowerCase() === rol.toLowerCase();
     const estadoOk = !estado || u.estado === estado;
     return coincide && rolOk && estadoOk;
@@ -153,7 +152,6 @@ function pintarUsuarios(idNuevo){
       <span>${escapar(u.nombre)}</span>
       <span>${escapar(u.rol)}</span>
       <span><i class="etiqueta ${u.estado}">${u.estado === 'activo' ? 'Activo' : 'Inactivo'}</i></span>
-      <span class="accesos-lista">${u.accesos.map(a => `<i class="acceso-chip">${escapar(a)}</i>`).join('')}</span>
       <span class="menu-fila">
         <button class="puntos" aria-label="Acciones de ${escapar(u.nombre)}">⋮</button>
         <span class="opciones">
@@ -249,7 +247,6 @@ document.getElementById('btnSi').addEventListener('click', () => {
     avisar(u.nombre + ' fue eliminado.');
   }
 
-  guardar();
   pendiente = null;
   cerrarModal('modalConfirmar');
   pintarUsuarios();
@@ -304,7 +301,6 @@ async function cargarRoles() {
 
       boton.addEventListener('click', () => {
         campos.rol.value = rol.id_rol;
-        marcarRol(rol.id_rol);
       });
 
       contenedor.appendChild(boton);
@@ -316,96 +312,17 @@ async function cargarRoles() {
   }
 }
 
-async function cargarAccesos() {
-  try {
-    const respuesta = await api('/api/accesos');
-
-    accesos = respuesta.datos || [];
-
-    const contenedor =
-      document.getElementById('listaAccesos');
-
-    contenedor.innerHTML = '';
-
-    accesos.forEach(acceso => {
-
-      const label =
-        document.createElement('label');
-
-      label.className = 'acceso';
-
-      label.innerHTML = `
-        <input
-          type="checkbox"
-          value="${acceso.id_acceso}"
-        >
-        <span>${escapar(acceso.nombre)}</span>
-      `;
-
-      contenedor.appendChild(label);
-    });
-
-  } catch (error) {
-    console.error('Error cargando accesos:', error);
-    avisar('No se pudieron cargar los accesos.');
-  }
-}
-
-async function marcarRol(idRol) {
-
-  document.querySelectorAll('.rol-chip').forEach(chip => {
-    chip.classList.toggle(
-      'is-on',
-      Number(chip.dataset.idRol) === Number(idRol)
-    );
-  });
-
-  if (!idRol) {
-    cajasAcceso().forEach(c => {
-      c.checked = false;
-    });
-
-    return;
-  }
-
-  try {
-
-    const respuesta =
-      await api(`/api/roles/${idRol}/accesos`);
-
-    const accesosRol = respuesta.datos || [];
-
-    const idsAcceso =
-      accesosRol.map(a => Number(a.id_acceso));
-
-    cajasAcceso().forEach(c => {
-      c.checked =
-        idsAcceso.includes(Number(c.value));
-    });
-
-  } catch (error) {
-
-    console.error(
-      'Error cargando accesos del rol:',
-      error
-    );
-
-    avisar(
-      'No se pudieron cargar los accesos del rol.'
-    );
-  }
-}
 const form = document.getElementById('formUsuario');
 const campos = {
   empleado: document.getElementById('empleado'),
   nombre:   document.getElementById('nombre'),
   usuario:  document.getElementById('usuario'),
-  //correo:   document.getElementById('correo'),
+  correo:   document.getElementById('correo'),
   clave:    document.getElementById('clave'),
   clave2:   document.getElementById('clave2'),
   rol:      document.getElementById('rol')
 };
-const cajasAcceso = () => Array.from(document.querySelectorAll('.accesos .acceso input'));
+
 
 document.getElementById('btnNuevo').addEventListener('click', () => abrirFormulario(null));
 document.getElementById('btnCancelar').addEventListener('click', () => {
@@ -420,25 +337,20 @@ function abrirFormulario(u){
   if (!empleados.length) {
     cargarEmpleados();
   }
-
+  cargarRoles();
   limpiarErrores();
   form.reset();
 
   document.getElementById('tituloForm').textContent = u ? 'Editar usuario' : 'Nuevo usuario';
   document.getElementById('subForm').textContent = u
-    ? 'Actualiza los datos y los accesos de esta cuenta'
-    : 'Crea una cuenta y define los accesos que tendrá dentro del sistema';
+    ? 'Actualiza los datos y de esta cuenta'
+    : 'Crea una cuenta y define el rol que tendrá dentro del sistema';
   document.getElementById('btnGuardar').textContent = u ? 'Guardar cambios' : 'Crear usuario';
 
   if(u){
     campos.nombre.value = u.nombre;
     campos.usuario.value = u.usuario;
-    campos.correo.value = u.correo;
     campos.rol.value = u.rol;
-    marcarRol(u.rol, false);
-    cajasAcceso().forEach(c => {
-      c.checked = u.accesos.includes(c.value);
-    });
   }
   irA('nuevo');
   campos.nombre.focus();
@@ -493,15 +405,6 @@ function quitarTildes(t){
   return t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
 }
 
-
-function marcarRol(rol, aplicarAccesos){
-  document.querySelectorAll('.rol-chip').forEach(c => c.classList.toggle('is-on', c.dataset.rol === rol));
-  if(aplicarAccesos){
-    const sugeridos = ACCESOS_POR_ROL[rol] || [];
-    cajasAcceso().forEach(c => c.checked = sugeridos.includes(c.value));
-  }
-}
-
 /* Ojitos de las contraseñas */
 document.querySelectorAll('.ojo').forEach(b => {
   b.addEventListener('click', () => {
@@ -513,16 +416,13 @@ document.querySelectorAll('.ojo').forEach(b => {
   });
 });
 
-/* Validación */
-const correoRe = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
-
 function reglas(){
   const usuarioRepetido = usuarios.some(u =>
     u.usuario.toLowerCase() === campos.usuario.value.trim().toLowerCase() && u.id !== editandoId);
   return {
     nombre:  campos.nombre.value.trim().length >= 3,
     usuario: campos.usuario.value.trim().length >= 4 && !usuarioRepetido,
-    //correo:  correoRe.test(campos.correo.value.trim()),
+    correo:  correoRe.test(campos.correo.value.trim()),
     clave:   editandoId !== null ? (campos.clave.value === '' || campos.clave.value.length >= 8) : campos.clave.value.length >= 8,
     clave2:  campos.clave.value === campos.clave2.value
   };
@@ -555,47 +455,61 @@ function limpiarErrores(){
   document.querySelectorAll('.campo.mal').forEach(c => c.classList.remove('mal'));
 }
 
-form.addEventListener('submit', e => {
+form.addEventListener('submit', async (e) => {
+  console.log('submit disparado');
+  debugger;
   e.preventDefault();
   if(!validar(true)) return;
 
-  const accesos = cajasAcceso().filter(c => c.checked).map(c => c.value);
-
-  const datos = {
-    nombre:  campos.nombre.value.trim(),
+  const payload = {
+    codigo_empleado: Number(campos.empleado.value),
     usuario: campos.usuario.value.trim(),
-    correo:  campos.correo.value.trim(),
-    rol:     campos.rol.value,
-    accesos: accesos.length ? accesos : ['Sin accesos']
+    contrasenia: campos.clave.value,
+    Activo: 1,
+    id_rol: Number(campos.rol.value)
   };
 
-  let id;
-  if(editandoId !== null){
-    const u = usuarios.find(x => x.id === editandoId);
-    Object.assign(u, datos);
-    id = u.id;
-  }else{
-    id = Date.now();
-    usuarios.push({ id, estado:'activo', ...datos });
+  try {
+    const respuesta = await api('/api/usuarios', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    const datos = {
+      nombre: campos.nombre.value.trim(),
+      usuario: payload.usuario,
+      rol: String(campos.rol.value),
+    };
+
+    let id;
+    if(editandoId !== null){
+      const u = usuarios.find(x => x.id === editandoId);
+      Object.assign(u, datos);
+      id = u.id;
+    }else{
+      id = Date.now();
+      usuarios.push({ id, estado:'activo', ...datos });
+    }
+
+    document.getElementById('tituloOk').textContent =
+      editandoId !== null ? 'Cambios guardados' : 'Usuario creado correctamente';
+    document.getElementById('textoOk').textContent =
+      editandoId !== null
+        ? 'Los datos y los accesos de la cuenta quedaron actualizados.'
+        : 'La cuenta fue creada y los accesos se asignaron correctamente.';
+    document.getElementById('okNombre').textContent = datos.nombre;
+    document.getElementById('okDatos').textContent = 'Usuario: ' + datos.usuario + '  •  Rol: ' + datos.rol;
+
+    form.reset();
+    limpiarErrores();
+    abrirModal('modalOk');
+    document.getElementById('btnAceptar').dataset.id = id;
+
+    console.log('Respuesta de creación:', respuesta);
+  } catch (error) {
+    console.error('Error creando usuario:', error);
+    avisar(error.message || 'No se pudo crear el usuario.');
   }
-  guardar();
-
-  /* Aquí es donde mandarías los datos a tu backend:
-     fetch('api/usuarios.php', { method:'POST', body:JSON.stringify(datos) }) */
-
-  document.getElementById('tituloOk').textContent =
-    editandoId !== null ? 'Cambios guardados' : 'Usuario creado correctamente';
-  document.getElementById('textoOk').textContent =
-    editandoId !== null
-      ? 'Los datos y los accesos de la cuenta quedaron actualizados.'
-      : 'La cuenta fue creada y los accesos se asignaron correctamente.';
-  document.getElementById('okNombre').textContent = datos.nombre;
-  document.getElementById('okDatos').textContent = 'Usuario: ' + datos.usuario + '  •  Rol: ' + datos.rol;
-
-  form.reset();
-  limpiarErrores();
-  abrirModal('modalOk');
-  document.getElementById('btnAceptar').dataset.id = id;
 });
 
 document.getElementById('btnAceptar').addEventListener('click', e => {
