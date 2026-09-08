@@ -17,9 +17,9 @@ const PORT = 3000;
 
 const dbConfig = {
     user: "sa",
-    password: "Umg$2023",
+    password: "HolaKoishi",
     server: "127.0.0.1",
-    port: 51433,
+    port: 1433,
     database: "Seisa",
 
     options: {

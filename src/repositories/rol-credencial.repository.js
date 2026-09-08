@@ -7,7 +7,7 @@ async function obtenerTodos() {
     const resultado = await pool.request().query(`
         SELECT ${columnas}
         FROM Rol_credencial
-        ORDER BY id_rol_credencial DESC
+        ORDER BY id_rol_credencial ASC
     `);
     return resultado.recordset;
 }
