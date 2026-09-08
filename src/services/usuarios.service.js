@@ -65,6 +65,69 @@ async function crear(datos) {
     });
 }
 
+async function actualizar(id, datos) {
+    const idUsuario = Number(id);
+
+    if (!Number.isInteger(idUsuario) || idUsuario <= 0) {
+        throw new Error("El usuario seleccionado es inválido.");
+    }
+
+    const actual = await repository.obtenerPorId(idUsuario);
+    if (!actual) {
+        throw new Error("El usuario no existe.");
+    }
+
+    const usuario = datos.usuario !== undefined ? String(datos.usuario).trim() : actual.usuario;
+    if (!usuario) {
+        throw new Error("El usuario es obligatorio.");
+    }
+
+    if (usuario.length > 80) {
+        throw new Error("El usuario no puede superar los 80 caracteres.");
+    }
+
+    const usuarioExistente = await repository.obtenerPorUsuario(usuario);
+    if (usuarioExistente && usuarioExistente.id_credencial !== idUsuario) {
+        throw new Error("El nombre de usuario ya está registrado.");
+    }
+
+    const codigoEmpleado =
+        datos.codigo_empleado !== undefined ? Number(datos.codigo_empleado) : Number(actual.codigo_empleado);
+
+    if (!Number.isInteger(codigoEmpleado) || codigoEmpleado <= 0) {
+        throw new Error("El código de empleado debe ser un número entero.");
+    }
+
+    const empleadoExistente = await repository.obtenerPorCodigoEmpleado(codigoEmpleado);
+    if (empleadoExistente && empleadoExistente.id_credencial !== idUsuario) {
+        throw new Error("El código de empleado ya tiene una credencial.");
+    }
+
+    if (datos.contrasenia !== undefined && datos.contrasenia !== "" && typeof datos.contrasenia !== "string") {
+        throw new Error("La contraseña debe ser texto.");
+    }
+
+    if (datos.contrasenia !== undefined && datos.contrasenia !== "" && datos.contrasenia.length < 6) {
+        throw new Error("La contraseña debe tener al menos 6 caracteres.");
+    }
+
+    const idRol = datos.id_rol !== undefined ? Number(datos.id_rol) : undefined;
+    if (idRol !== undefined && (!Number.isInteger(idRol) || idRol <= 0)) {
+        throw new Error("Debe seleccionar un rol válido.");
+    }
+
+    const payload = {
+        codigo_empleado: codigoEmpleado,
+        usuario,
+        Activo: datos.Activo !== undefined ? Number(datos.Activo) : Number(actual.Activo),
+        ...(datos.contrasenia !== undefined && datos.contrasenia !== "" ? { contrasenia: datos.contrasenia } : {}),
+        ...(idRol !== undefined ? { id_rol: idRol } : {})
+    };
+
+    return await repository.actualizar(idUsuario, payload);
+}
+
 module.exports = {
-    crear
+    crear,
+    actualizar
 };

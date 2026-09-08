@@ -8,6 +8,7 @@ const sinMovimiento =
 let usuarios = [];
 let empleados = [];
 let roles = [];
+let accesos = [];
 
 let editandoId = null;
 let pendiente = null;
@@ -350,7 +351,10 @@ function abrirFormulario(u){
   if(u){
     campos.nombre.value = u.nombre;
     campos.usuario.value = u.usuario;
-    campos.rol.value = u.rol;
+    if (u.codigo_empleado !== undefined) campos.empleado.value = u.codigo_empleado;
+    if (u.id_rol !== undefined) campos.rol.value = u.id_rol;
+    campos.clave.value = '';
+    campos.clave2.value = '';
   }
   irA('nuevo');
   campos.nombre.focus();
@@ -422,7 +426,6 @@ function reglas(){
   return {
     nombre:  campos.nombre.value.trim().length >= 3,
     usuario: campos.usuario.value.trim().length >= 4 && !usuarioRepetido,
-    correo:  correoRe.test(campos.correo.value.trim()),
     clave:   editandoId !== null ? (campos.clave.value === '' || campos.clave.value.length >= 8) : campos.clave.value.length >= 8,
     clave2:  campos.clave.value === campos.clave2.value
   };
@@ -456,45 +459,56 @@ function limpiarErrores(){
 }
 
 form.addEventListener('submit', async (e) => {
-  console.log('submit disparado');
-  debugger;
   e.preventDefault();
   if(!validar(true)) return;
 
   const payload = {
-    codigo_empleado: Number(campos.empleado.value),
     usuario: campos.usuario.value.trim(),
-    contrasenia: campos.clave.value,
     Activo: 1,
-    id_rol: Number(campos.rol.value)
   };
 
+  if (campos.empleado.value) {
+    payload.codigo_empleado = Number(campos.empleado.value);
+  }
+
+  if (campos.rol.value) {
+    payload.id_rol = Number(campos.rol.value);
+  }
+
+  if (campos.clave.value) {
+    payload.contrasenia = campos.clave.value;
+  }
+
+  const esEdicion = editandoId !== null;
+  const url = esEdicion ? `/api/usuarios/${editandoId}` : '/api/usuarios';
+
   try {
-    const respuesta = await api('/api/usuarios', {
-      method: 'POST',
+    const respuesta = await api(url, {
+      method: esEdicion ? 'PUT' : 'POST',
       body: JSON.stringify(payload)
     });
 
     const datos = {
       nombre: campos.nombre.value.trim(),
       usuario: payload.usuario,
-      rol: String(campos.rol.value),
+      rol: roles.find(r => Number(r.id_rol) === Number(campos.rol.value))?.nombre || String(campos.rol.value),
     };
 
-    let id;
-    if(editandoId !== null){
-      const u = usuarios.find(x => x.id === editandoId);
-      Object.assign(u, datos);
-      id = u.id;
-    }else{
+    let id = editandoId;
+    if(!esEdicion){
       id = Date.now();
       usuarios.push({ id, estado:'activo', ...datos });
+    } else {
+      const u = usuarios.find(x => x.id === editandoId);
+      if (u) {
+        Object.assign(u, datos, { estado: u.estado || 'activo' });
+      }
     }
 
     document.getElementById('tituloOk').textContent =
-      editandoId !== null ? 'Cambios guardados' : 'Usuario creado correctamente';
+      esEdicion ? 'Cambios guardados' : 'Usuario creado correctamente';
     document.getElementById('textoOk').textContent =
-      editandoId !== null
+      esEdicion
         ? 'Los datos y los accesos de la cuenta quedaron actualizados.'
         : 'La cuenta fue creada y los accesos se asignaron correctamente.';
     document.getElementById('okNombre').textContent = datos.nombre;
@@ -505,10 +519,10 @@ form.addEventListener('submit', async (e) => {
     abrirModal('modalOk');
     document.getElementById('btnAceptar').dataset.id = id;
 
-    console.log('Respuesta de creación:', respuesta);
+    console.log('Respuesta del envío:', respuesta);
   } catch (error) {
-    console.error('Error creando usuario:', error);
-    avisar(error.message || 'No se pudo crear el usuario.');
+    console.error('Error creando/actualizando usuario:', error);
+    avisar(error.message || 'No se pudo guardar el usuario.');
   }
 });
 

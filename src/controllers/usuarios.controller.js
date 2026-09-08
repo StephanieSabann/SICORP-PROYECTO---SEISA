@@ -19,6 +19,26 @@ async function crear(req, res) {
     }
 }
 
+async function actualizar(req, res) {
+    try {
+        const usuario = await service.actualizar(req.params.id, req.body);
+
+        res.status(200).json({
+            exito: true,
+            mensaje: "Usuario actualizado correctamente.",
+            datos: usuario
+        });
+    } catch (error) {
+        console.error(error);
+
+        res.status(400).json({
+            exito: false,
+            mensaje: error.message
+        });
+    }
+}
+
 module.exports = {
-    crear
+    crear,
+    actualizar
 };
