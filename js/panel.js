@@ -153,6 +153,7 @@ function pintarUsuarios(idNuevo){
       <span>${escapar(u.nombre)}</span>
       <span>${escapar(u.rol)}</span>
       <span><i class="etiqueta ${u.estado}">${u.estado === 'activo' ? 'Activo' : 'Inactivo'}</i></span>
+      <span class="accesos-lista">${u.accesos.map(a => `<i class="acceso-chip">${escapar(a)}</i>`).join('')}</span>
       <span class="menu-fila">
         <button class="puntos" aria-label="Acciones de ${escapar(u.nombre)}">⋮</button>
         <span class="opciones">
@@ -302,6 +303,7 @@ async function cargarRoles() {
 
       boton.addEventListener('click', () => {
         campos.rol.value = rol.id_rol;
+        marcarRol(rol.id_rol);
       });
 
       contenedor.appendChild(boton);
@@ -310,6 +312,90 @@ async function cargarRoles() {
   } catch (error) {
     console.error('Error cargando roles:', error);
     avisar('No se pudieron cargar los roles.');
+  }
+}
+
+async function cargarAccesos() {
+  try {
+    const respuesta = await api('/api/accesos');
+
+    accesos = respuesta.datos || [];
+
+    const contenedor =
+      document.getElementById('listaAccesos');
+
+    contenedor.innerHTML = '';
+
+    accesos.forEach(acceso => {
+
+      const label =
+        document.createElement('label');
+
+      label.className = 'acceso';
+
+      label.innerHTML = `
+        <input
+          type="checkbox"
+          value="${acceso.id_acceso}"
+        >
+        <span>${escapar(acceso.nombre)}</span>
+      `;
+
+      contenedor.appendChild(label);
+    });
+
+  } catch (error) {
+    console.error('Error cargando accesos:', error);
+    avisar('No se pudieron cargar los accesos.');
+  }
+}
+
+function cajasAcceso() {
+  return document.querySelectorAll('#listaAccesos input[type="checkbox"]');
+}
+
+async function marcarRol(idRol) {
+
+  document.querySelectorAll('.rol-chip').forEach(chip => {
+    chip.classList.toggle(
+      'is-on',
+      Number(chip.dataset.idRol) === Number(idRol)
+    );
+  });
+
+  if (!idRol) {
+    cajasAcceso().forEach(c => {
+      c.checked = false;
+    });
+
+    return;
+  }
+
+  try {
+
+    const respuesta =
+      await api(`/api/roles/${idRol}/accesos`);
+
+    const accesosRol = respuesta.datos || [];
+
+    const idsAcceso =
+      accesosRol.map(a => Number(a.id_acceso));
+
+    cajasAcceso().forEach(c => {
+      c.checked =
+        idsAcceso.includes(Number(c.value));
+    });
+
+  } catch (error) {
+
+    console.error(
+      'Error cargando accesos del rol:',
+      error
+    );
+
+    avisar(
+      'No se pudieron cargar los accesos del rol.'
+    );
   }
 }
 
@@ -353,6 +439,7 @@ function abrirFormulario(u){
     campos.usuario.value = u.usuario;
     if (u.codigo_empleado !== undefined) campos.empleado.value = u.codigo_empleado;
     if (u.id_rol !== undefined) campos.rol.value = u.id_rol;
+    marcarRol(u.id_rol);
     campos.clave.value = '';
     campos.clave2.value = '';
   }
