@@ -2,25 +2,29 @@ const { sql, obtenerPool } = require("../config/database");
 
 
 // ==========================================
-// OBTENER TODAS LAS CREDENCIALES
+// OBTENER TODAS LAS CREDENCIALES (CON RELACIONES)
 // ==========================================
-
 async function obtenerTodas() {
-
     const pool = await obtenerPool();
-
-    const resultado = await pool
-        .request()
-        .query(`
-            SELECT
-                id_credencial,
-                codigo_empleado,
-                Activo,
-                usuario
-            FROM credenciales
-            ORDER BY id_credencial DESC
-        `);
-
+    const resultado = await pool.request().query(`
+        SELECT 
+            c.id_credencial AS id,
+            e.nombre + ' ' + e.apellido AS nombre,
+            c.usuario,
+            c.Activo,
+            r.nombre AS rol,
+            r.id_rol,
+            STRING_AGG(ca.nombre, ',') AS accesos
+        FROM credenciales c
+        INNER JOIN Empleado e ON c.codigo_empleado = e.codigo_empleado
+        LEFT JOIN Rol_credencial rc ON c.id_credencial = rc.id_credencial
+        LEFT JOIN Rol r ON rc.id_rol = r.id_rol
+        LEFT JOIN Rol_acceso ra ON r.id_rol = ra.id_rol
+        LEFT JOIN Catalogo_acceso ca ON ra.id_acceso = ca.id_acceso
+        GROUP BY 
+            c.id_credencial, e.nombre, e.apellido, c.usuario, c.Activo, r.nombre, r.id_rol
+        ORDER BY c.id_credencial DESC
+    `);
     return resultado.recordset;
 }
 

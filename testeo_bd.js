@@ -4,7 +4,7 @@ const config = {
     user: "sa",
     password: "HolaKoishi",
     server: "127.0.0.1",
-    port: 1433,
+    port: 51433,
     database: "Seisa",
 
     options: {

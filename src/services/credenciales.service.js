@@ -6,8 +6,18 @@ const repository = require("../repositories/credenciales.repository");
 // ==========================================
 
 async function obtenerTodas() {
-
-    return await repository.obtenerTodas();
+    const registros = await repository.obtenerTodas();
+    
+    // Transformamos los datos SQL a la estructura que espera tu HTML/JS
+    return registros.map(row => ({
+        id: row.id,
+        nombre: row.nombre,
+        usuario: row.usuario,
+        estado: row.Activo ? 'activo' : 'inactivo',
+        rol: row.rol || 'Sin rol asignado',
+        id_rol: row.id_rol,
+        accesos: row.accesos ? row.accesos.split(',') : ['Sin accesos']
+    }));
 }
 
 

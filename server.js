@@ -3,6 +3,7 @@ const sql = require("mssql");
 const session = require("express-session");
 const path = require("path");
 const empleadosRoutes = require("./src/routes/empleados.routes");
+const credencialesRoutes = require('./src/routes/credenciales.routes');
 
 const app = express();
 const PORT = 3000;
@@ -13,9 +14,9 @@ const PORT = 3000;
 
 const dbConfig = {
     user: "sa",
-    password: "HolaKoishi",
+    password: "Umg$2023",
     server: "127.0.0.1",
-    port: 1433,
+    port: 51433,
     database: "Seisa",
 
     options: {
@@ -48,6 +49,7 @@ app.use(express.json());
 
 // Permite recibir datos enviados desde formularios
 app.use(express.urlencoded({ extended: true }));
+app.use('/api/credenciales', credencialesRoutes);
 
 // API de empleados para los formularios del panel
 app.use("/api/empleados", empleadosRoutes);

@@ -64,7 +64,7 @@ function irA(vista){
   vistas.forEach(v => v.classList.toggle('is-active', v.id === 'v-' + vista));
   cerrarMenus();
   window.scrollTo({ top:0, behavior:'auto' });
-  if(vista === 'usuarios') pintarUsuarios();
+  if(vista === 'usuarios') cargarUsuarios(); // <-- Antes decía pintarUsuarios()
   location.hash = vista;
 }
 
@@ -134,7 +134,7 @@ function filtrados(){
   const estado = filtroEstado.value;
   return usuarios.filter(u => {
     const coincide = !texto ||
-      (u.nombre + ' ' + u.usuario + ' ' + u.correo + ' ' + u.rol).toLowerCase().includes(texto);
+      (u.nombre + ' ' + u.usuario + ' ' + (u.rol || '')).toLowerCase().includes(texto);
     const rolOk = !rol || u.rol.toLowerCase() === rol.toLowerCase();
     const estadoOk = !estado || u.estado === estado;
     return coincide && rolOk && estadoOk;
@@ -400,7 +400,7 @@ const campos = {
   empleado: document.getElementById('empleado'),
   nombre:   document.getElementById('nombre'),
   usuario:  document.getElementById('usuario'),
-  correo:   document.getElementById('correo'),
+  //correo:   document.getElementById('correo'),
   clave:    document.getElementById('clave'),
   clave2:   document.getElementById('clave2'),
   rol:      document.getElementById('rol')
@@ -522,7 +522,7 @@ function reglas(){
   return {
     nombre:  campos.nombre.value.trim().length >= 3,
     usuario: campos.usuario.value.trim().length >= 4 && !usuarioRepetido,
-    correo:  correoRe.test(campos.correo.value.trim()),
+    //correo:  correoRe.test(campos.correo.value.trim()),
     clave:   editandoId !== null ? (campos.clave.value === '' || campos.clave.value.length >= 8) : campos.clave.value.length >= 8,
     clave2:  campos.clave.value === campos.clave2.value
   };
@@ -669,5 +669,5 @@ async function api(url, opciones = {}) {
 /* ============================================================
    Arranque
    ============================================================ */
-pintarUsuarios();
+cargarUsuarios(); // <-- Ejecuta la petición GET a /api/credenciales
 irA(['inicio','usuarios','nuevo'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'inicio');
