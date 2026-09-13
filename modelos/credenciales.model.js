@@ -1,0 +1,302 @@
+const { sql, obtenerPool } = require("../basededatos/conexion");
+
+
+// ==========================================
+// OBTENER TODAS LAS CREDENCIALES (CON RELACIONES)
+// ==========================================
+async function obtenerTodas() {
+    const pool = await obtenerPool();
+    const resultado = await pool.request().query(`
+        SELECT 
+            c.id_credencial AS id,
+            e.nombre + ' ' + e.apellido AS nombre,
+            c.usuario,
+            c.Activo,
+            r.nombre AS rol,
+            r.id_rol,
+            STRING_AGG(ca.nombre, ',') AS accesos
+        FROM credenciales c
+        INNER JOIN Empleado e ON c.codigo_empleado = e.codigo_empleado
+        LEFT JOIN Rol_credencial rc ON c.id_credencial = rc.id_credencial
+        LEFT JOIN Rol r ON rc.id_rol = r.id_rol
+        LEFT JOIN Rol_acceso ra ON r.id_rol = ra.id_rol
+        LEFT JOIN Catalogo_acceso ca ON ra.id_acceso = ca.id_acceso
+        GROUP BY 
+            c.id_credencial, e.nombre, e.apellido, c.usuario, c.Activo, r.nombre, r.id_rol
+        ORDER BY c.id_credencial DESC
+    `);
+    return resultado.recordset;
+}
+
+
+// ==========================================
+// OBTENER UNA CREDENCIAL POR ID
+// ==========================================
+
+async function obtenerPorId(id) {
+
+    const pool = await obtenerPool();
+
+    const resultado = await pool
+        .request()
+        .input("id_credencial", sql.Int, id)
+        .query(`
+            SELECT
+                id_credencial,
+                codigo_empleado,
+                Activo,
+                usuario
+            FROM credenciales
+            WHERE id_credencial = @id_credencial
+        `);
+
+    return resultado.recordset[0];
+}
+
+
+// ==========================================
+// BUSCAR POR USUARIO
+// ==========================================
+
+async function obtenerPorUsuario(usuario) {
+
+    const pool = await obtenerPool();
+
+    const resultado = await pool
+        .request()
+        .input("usuario", sql.VarChar(80), usuario)
+        .query(`
+            SELECT
+                id_credencial,
+                codigo_empleado,
+                Activo,
+                usuario
+            FROM credenciales
+            WHERE usuario = @usuario
+        `);
+
+    return resultado.recordset[0];
+}
+
+
+// ==========================================
+// BUSCAR POR CÓDIGO DE EMPLEADO
+// ==========================================
+
+async function obtenerPorCodigoEmpleado(codigoEmpleado) {
+
+    const pool = await obtenerPool();
+
+    const resultado = await pool
+        .request()
+        .input("codigo_empleado", sql.Int, codigoEmpleado)
+        .query(`
+            SELECT
+                id_credencial,
+                codigo_empleado,
+                Activo,
+                usuario
+            FROM credenciales
+            WHERE codigo_empleado = @codigo_empleado
+        `);
+
+    return resultado.recordset[0];
+}
+
+
+// ==========================================
+// CREAR CREDENCIAL
+// ==========================================
+
+async function crear(datos) {
+
+    const pool = await obtenerPool();
+
+    const resultado = await pool
+        .request()
+        .input(
+            "codigo_empleado",
+            sql.Int,
+            datos.codigo_empleado
+        )
+        .input(
+            "Activo",
+            sql.Bit,
+            datos.Activo === undefined ? true : datos.Activo
+        )
+        .input(
+            "usuario",
+            sql.VarChar(80),
+            datos.usuario
+        )
+        .input(
+            "contrasenia",
+            sql.VarChar(255),
+            datos.contrasenia
+        )
+        .query(`
+            INSERT INTO credenciales
+            (
+                codigo_empleado,
+                Activo,
+                usuario,
+                contrasenia
+            )
+            VALUES
+            (
+                @codigo_empleado,
+                @Activo,
+                @usuario,
+                HASHBYTES('SHA2_512', @contrasenia)
+            );
+
+            SELECT
+                id_credencial,
+                codigo_empleado,
+                Activo,
+                usuario
+            FROM credenciales
+            WHERE id_credencial = SCOPE_IDENTITY();
+        `);
+
+    return resultado.recordset[0];
+}
+
+
+// ==========================================
+// ACTUALIZAR CREDENCIAL
+// ==========================================
+
+async function actualizar(id, datos) {
+
+    const pool = await obtenerPool();
+
+    const resultado = await pool
+        .request()
+        .input(
+            "id_credencial",
+            sql.Int,
+            id
+        )
+        .input(
+            "codigo_empleado",
+            sql.Int,
+            datos.codigo_empleado
+        )
+        .input(
+            "Activo",
+            sql.Bit,
+            datos.Activo === undefined ? null : datos.Activo
+        )
+        .input(
+            "usuario",
+            sql.VarChar(80),
+            datos.usuario
+        )
+        .query(`
+            UPDATE credenciales
+            SET
+                codigo_empleado = @codigo_empleado,
+                Activo = COALESCE(@Activo, Activo),
+                usuario = @usuario
+            WHERE id_credencial = @id_credencial;
+
+            SELECT
+                id_credencial,
+                codigo_empleado,
+                Activo,
+                usuario
+            FROM credenciales
+            WHERE id_credencial = @id_credencial;
+        `);
+
+    return resultado.recordset[0];
+}
+
+
+// ==========================================
+// ACTUALIZAR CONTRASEÑA
+// ==========================================
+
+async function actualizarContrasenia(id, contrasenia) {
+
+    const pool = await obtenerPool();
+
+    const resultado = await pool
+        .request()
+        .input(
+            "id_credencial",
+            sql.Int,
+            id
+        )
+        .input(
+            "contrasenia",
+            sql.VarChar(255),
+            contrasenia
+        )
+        .query(`
+            UPDATE credenciales
+            SET
+                contrasenia = HASHBYTES(
+                    'SHA2_512',
+                    @contrasenia
+                )
+            OUTPUT
+                INSERTED.id_credencial,
+                INSERTED.codigo_empleado,
+                INSERTED.Activo,
+                INSERTED.usuario
+            WHERE id_credencial = @id_credencial
+        `);
+
+    return resultado.recordset[0];
+}
+
+
+// ==========================================
+// ELIMINAR
+// ==========================================
+
+async function eliminar(id) {
+
+    const pool = await obtenerPool();
+
+    const resultado = await pool
+        .request()
+        .input(
+            "id_credencial",
+            sql.Int,
+            id
+        )
+        .query(`
+            DELETE FROM credenciales
+            OUTPUT
+                DELETED.id_credencial,
+                DELETED.codigo_empleado,
+                DELETED.Activo,
+                DELETED.usuario
+            WHERE id_credencial = @id_credencial
+        `);
+
+    return resultado.recordset[0];
+}
+
+//FUNCION PAR ALTERNAR
+async function cambiarEstado(id, activo) {
+    const pool = await obtenerPool();
+    await pool.request()
+        .input('id', sql.Int, id)
+        .input('activo', sql.Bit, activo ? 1 : 0)
+        .query('UPDATE credenciales SET Activo = @activo WHERE id_credencial = @id');
+}
+module.exports = {
+    obtenerTodas,
+    obtenerPorId,
+    obtenerPorUsuario,
+    obtenerPorCodigoEmpleado,
+    crear,
+    actualizar,
+    actualizarContrasenia,
+    eliminar,
+    cambiarEstado
+};

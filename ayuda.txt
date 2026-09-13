@@ -1,0 +1,9 @@
+basededatos: contiene las credenciales a la base de datos sql 
+controlador: logica de negocio y revision de json
+rutas: redirige las solicitudes hacia controladores segun tipo de petición http (GET, POST, etc) 
+modelos: toma los datos del controlador y los traduce a sql
+
+server.js: toma la conexion de la base de datos y configura el servidor express
+(IMPORTANTE: Aquí sucede TODO el proceso del login en vez de estar repartido por el resto de carpetas.)
+Nota: server.js genera una cookie que permite registrar "sesiones" en la base de datos. 
+Con eso podríamos controlar posteriormente el diferente nivel de acceso.
