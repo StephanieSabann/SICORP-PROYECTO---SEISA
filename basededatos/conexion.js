@@ -1,11 +1,20 @@
 const sql = require("mssql");
+require("dotenv").config(); //para ocultar configuracion sql
 
 const dbConfig = {
+<<<<<<< HEAD
     user: "sa",
     password: "PASS",
     server: "IPV4",
     port: 51433,
     database: "DB",
+=======
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    server: process.env.DB_SERVER,
+    port: Number(process.env.DB_PORT),
+    database: process.env.DB_DATABASE,
+>>>>>>> b39d3d2 (Se agregaron las contraseñas en archivo y se creó gitignore para evitar subir dicho archivo)
 
     options: {
         encrypt: false,
