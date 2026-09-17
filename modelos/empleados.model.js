@@ -10,11 +10,13 @@ async function obtenerTodos() {
             nombre,
             apellido,
             dpi,
+            nit,
             direccion,
             telefono,
             email,
             fecha_contratacion,
-            activo
+            activo,
+            fecha_nacimiento
         FROM Empleado
         ORDER BY nombre, apellido, codigo_empleado
     `);
@@ -35,11 +37,13 @@ async function obtenerPorCodigo(codigoEmpleado) {
                 nombre,
                 apellido,
                 dpi,
+                nit,
                 direccion,
                 telefono,
                 email,
                 fecha_contratacion,
-                activo
+                activo,
+                fecha_nacimiento
             FROM Empleado
             WHERE codigo_empleado = @codigo_empleado
         `);
@@ -56,11 +60,13 @@ async function crear(datos) {
         .input("nombre", sql.VarChar(16), datos.nombre)
         .input("apellido", sql.VarChar(16), datos.apellido)
         .input("dpi", sql.VarChar(13), datos.dpi)
+        .input("nit", sql.Int, datos.nit)
         .input("direccion", sql.VarChar(24), datos.direccion)
         .input("telefono", sql.VarChar(16), datos.telefono)
         .input("email", sql.VarChar(32), datos.email)
         .input("fecha_contratacion", sql.Date, datos.fecha_contratacion)
         .input("activo", sql.Bit, datos.activo)
+        .input("fecha_nacimiento", sql.Date, datos.fecha_nacimiento)
         .query(`
             INSERT INTO Empleado
             (
@@ -68,11 +74,13 @@ async function crear(datos) {
                 nombre,
                 apellido,
                 dpi,
+                nit,
                 direccion,
                 telefono,
                 email,
                 fecha_contratacion,
-                activo
+                activo,
+                fecha_nacimiento
             )
             OUTPUT
                 INSERTED.codigo_empleado,
@@ -80,17 +88,20 @@ async function crear(datos) {
                 INSERTED.nombre,
                 INSERTED.apellido,
                 INSERTED.dpi,
+                INSERTED.nit,
                 INSERTED.direccion,
                 INSERTED.telefono,
                 INSERTED.email,
                 INSERTED.fecha_contratacion,
-                INSERTED.activo
+                INSERTED.activo,
+                INSERTED.fecha_nacimiento
             VALUES
             (
                 @id_puesto,
                 @nombre,
                 @apellido,
                 @dpi,
+                @nit,
                 @direccion,
                 @telefono,
                 @email,
@@ -113,11 +124,13 @@ async function actualizar(codigoEmpleado, datos) {
         nombre: [sql.VarChar(16), datos.nombre],
         apellido: [sql.VarChar(16), datos.apellido],
         dpi: [sql.VarChar(13), datos.dpi],
+        nit: [sql.Int, datos.nit],
         direccion: [sql.VarChar(24), datos.direccion],
         telefono: [sql.VarChar(16), datos.telefono],
         email: [sql.VarChar(32), datos.email],
         fecha_contratacion: [sql.Date, datos.fecha_contratacion],
-        activo: [sql.Bit, datos.activo]
+        activo: [sql.Bit, datos.activo],
+        fecha_nacimiento: [sql.Date, datos.fecha_nacimiento],
     };
 
     const campos = Object.keys(datos).map(campo => {
@@ -135,11 +148,13 @@ async function actualizar(codigoEmpleado, datos) {
             INSERTED.nombre,
             INSERTED.apellido,
             INSERTED.dpi,
+            INSERTED.nit,
             INSERTED.direccion,
             INSERTED.telefono,
             INSERTED.email,
             INSERTED.fecha_contratacion,
-            INSERTED.activo
+            INSERTED.activo,
+            INSERTED.fecha_nacimiento
         WHERE codigo_empleado = @codigo_empleado
     `);
 

@@ -43,12 +43,14 @@ async function cargarTodos() {
       codigo: e.codigo_empleado,
       nombre: `${e.nombre} ${e.apellido}`.trim(),
       dpi: e.dpi || '',
+      nit: e.nit || '',
       telefono: e.telefono || '',
       correo: e.email || '',
       direccion: e.direccion || '',
       ingreso: e.fecha_contratacion ? e.fecha_contratacion.split('T')[0] : '',
       estado: e.activo ? 'activo' : 'inactivo',
-      tipo: e.id_puesto === 1 ? 'Administrativo' : 'Técnico'
+      tipo: e.id_puesto === 1 ? 'Administrativo' : 'Técnico',
+      nacimiento: e.fecha_nacimiento ? e.fecha_nacimiento.split('T')[0] : '',
     }));
 
     llenarUnidades();
@@ -411,6 +413,7 @@ function abrirFormularioEmpleado(emp){
     fCampos.ingreso.value = emp.ingreso || '';
     fCampos.salario.value = emp.salario || '';
     fCampos.unidad.value = emp.unidad || '';
+    fCampos.nacimiento.value = emp.nacimiento;
   }
   irA('nuevo');
   fCampos.nombre.focus();
@@ -478,11 +481,13 @@ formEmpleado.addEventListener('submit', async e => { // Agregamos 'async'
   nombre: nombreDB,
   apellido: apellidoDB,
   dpi: fCampos.dpi.value.trim(),
+  nit: valorNit ? parseInt(valorNit) : null,
   direccion: fCampos.direccion.value.trim(),
   telefono: fCampos.telefono.value.trim(),
   email: fCampos.correo.value.trim(),
   fecha_contratacion: fCampos.ingreso.value,
-  activo: true
+  activo: true,
+  fecha_nacimiento: fCampos.ingreso.value
 };
 
   try {
@@ -690,11 +695,13 @@ document.getElementById('btnGuardarExp').addEventListener('click', async () => {
     nombre: nombreDB,
     apellido: apellidoDB,
     dpi: document.getElementById('dDpi').value.trim(),
+    nit: valorNitExp ? parseInt(valorNitExp) : null,
     telefono: document.getElementById('dTelefono').value.trim(),
     email: document.getElementById('dCorreo').value.trim(),
     direccion: document.getElementById('dDireccion').value.trim(),
     fecha_contratacion: document.getElementById('dIngreso').value,
-    id_puesto: mapaPuestos[tipoSeleccionado] || 1
+    id_puesto: mapaPuestos[tipoSeleccionado] || 1,
+    fecha_nacimiento: document.getElementById('dNacimiento').value,
   };
 
   try {
