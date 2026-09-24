@@ -11,6 +11,7 @@ const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
    solo escribe aquí el nombre del archivo. */
 const PAGINAS = {
   'Empleados': 'empleados.html',
+  'Usuarios': 'usuarios.html',
   'Inventario': null,
   'Nóminas': null,
   'Reportes': null
@@ -18,11 +19,95 @@ const PAGINAS = {
 
 document.querySelectorAll('[data-modulo]').forEach(el => {
   el.addEventListener('click', () => {
+    if (el.classList.contains('sin-acceso')) {
+      avisar('Tu rol no tiene acceso al módulo de ' + el.dataset.modulo + '.');
+      return;
+    }
     const destino = PAGINAS[el.dataset.modulo];
     if (destino) window.location.href = destino;
     else avisar('El módulo de ' + el.dataset.modulo + ' está en construcción.');
   });
 });
+
+/* Nombre y rol de quien inició sesión (ya no queda fijo "Jonathan").
+   Se pide a /api/sesion, que usa la cookie de sesión del login para
+   saber exactamente quién eres — y qué módulos le tocan según su rol. */
+async function cargarSesion(){
+  try {
+    const respuesta = await api('/api/sesion');
+    const datos = respuesta.datos;
+
+    const nombreEl = document.getElementById('nombreUsuario');
+    const rolEl = document.getElementById('rolUsuario');
+    if (nombreEl) nombreEl.textContent = datos.nombre || datos.usuario;
+    if (rolEl) rolEl.textContent = datos.rol;
+
+    aplicarAccesos(datos.accesos || []);
+    verificarAccesoPaginaActual(datos.accesos || []);
+    return datos;
+  } catch (error) {
+    /* Si no hay sesión válida, el servidor ya nos hubiera mandado a
+       "/" al pedir la página; esto es solo respaldo por si la sesión
+       expiró mientras la página seguía abierta. */
+    console.warn('No se pudo cargar la sesión:', error);
+    window.location.href = '/';
+    return null;
+  }
+}
+
+/* Punto 4: oculta de la barra lateral y de las tarjetas del inicio
+   los módulos a los que el rol de esta persona NO tiene acceso. Los
+   nombres tienen que coincidir con los de Catalogo_acceso.nombre en
+   la base de datos (Empleados, Usuarios, Inventario, Nóminas,
+   Reportes...). Si un módulo no aparece en absoluto en el catálogo
+   de accesos de nadie, mejor no lo ocultes por accidente: solo se
+   esconde si YA sabemos que existe como acceso y esta persona no lo
+   tiene. */
+function aplicarAccesos(accesos){
+  const normalizado = accesos.map(a => a.toLowerCase().trim());
+  const tieneAcceso = nombreModulo => normalizado.includes(nombreModulo.toLowerCase());
+
+  document.querySelectorAll('[data-modulo]').forEach(el => {
+    const modulo = el.dataset.modulo;
+    /* Si ningún acceso de ningún rol se llama así, no lo tocamos
+       (evita ocultar módulos que la base de datos todavía no tiene
+       registrados en Catalogo_acceso). */
+    if (!MODULOS_CON_CONTROL.includes(modulo)) return;
+
+    if (!tieneAcceso(modulo)) {
+      el.classList.add('sin-acceso');
+      el.setAttribute('aria-disabled', 'true');
+      el.title = 'Tu rol no tiene acceso a este módulo.';
+    }
+  });
+}
+
+/* Los módulos que SÍ esperamos controlar por rol. Empleados y
+   Usuarios ya están conectados a permisos reales; los demás se
+   agregan aquí en cuanto tengan su propio acceso en el catálogo. */
+const MODULOS_CON_CONTROL = ['Empleados', 'Usuarios'];
+
+/* Mantenimiento no es un "módulo" del catálogo de accesos — se
+   protege con el mismo acceso que ya exige el backend para
+   /api/roles, /api/accesos, etc: "Usuarios" (nivel administrador). */
+const PAGINA_A_ACCESO_REQUERIDO = { 'Mantenimiento': 'Usuarios' };
+
+/* Si alguien entra DIRECTO a la URL de un módulo que su rol no tiene
+   permitido (en vez de darle clic desde el menú), lo regresamos al
+   inicio con un aviso — la API ya lo hubiera rechazado de todas
+   formas (403), pero así no se queda viendo una pantalla vacía. */
+function verificarAccesoPaginaActual(accesos){
+  const pagina = document.body.dataset.pagina;
+  const accesoRequerido = PAGINA_A_ACCESO_REQUERIDO[pagina] || pagina;
+  if (!pagina || (!MODULOS_CON_CONTROL.includes(pagina) && !PAGINA_A_ACCESO_REQUERIDO[pagina])) return;
+
+  const normalizado = accesos.map(a => a.toLowerCase().trim());
+  if (!normalizado.includes(accesoRequerido.toLowerCase())) {
+    window.location.href = 'inicio.html?sinacceso=' + encodeURIComponent(pagina);
+  }
+}
+
+const sesionActual = cargarSesion();
 
 /* Marca en la barra lateral el módulo en el que estás */
 (function marcarModulo(){
@@ -37,7 +122,12 @@ document.querySelectorAll('[data-modulo]').forEach(el => {
   if (!caja) return;
   const h = new Date().getHours();
   const momento = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
-  caja.textContent = momento + ', ' + document.getElementById('nombreUsuario').textContent;
+  /* Se espera a que /api/sesion responda para poner el nombre real;
+     mientras tanto se deja solo el saludo sin nombre. */
+  caja.textContent = momento + '…';
+  sesionActual.then(datos => {
+    if (datos) caja.textContent = `${momento}, ${datos.nombre}`;
+  });
 })();
 
 /* ============================================================
@@ -58,14 +148,17 @@ document.querySelectorAll('#menuCuenta [data-ir]').forEach(b => {
     const destino = b.dataset.ir;
     cerrarMenus();
     if (destino === 'inicio') window.location.href = 'inicio.html';
-    else if (destino === 'usuarios') window.location.href = 'usuarios.html';
+    else if (destino === 'mantenimiento') window.location.href = 'mantenimiento.html';
     else avisar('La pantalla de cuenta todavía está en construcción.');
   });
 });
 
 document.getElementById('btnSalir').addEventListener('click', () => {
   avisar('Cerrando sesión…');
-  setTimeout(() => { window.location.href = 'index.html#login'; }, 500);
+  /* Antes esto solo redirigía sin avisarle al servidor: la sesión
+     seguía viva ahí (la cookie seguía siendo válida). Ahora sí se
+     llama a /logout para destruirla de verdad. */
+  window.location.href = '/logout';
 });
 
 function cerrarMenus(){
@@ -148,7 +241,16 @@ function abrirMenuAcciones(boton, opciones){
 }
 
 document.addEventListener('click', e => {
-  if (!e.target.closest('.cuenta') && !e.target.closest('.menu-fila')) cerrarMenus();
+  /* Este oyente es para cerrar el menú de la cuenta cuando se hace
+     clic afuera. Los menús "⋮" (creados con abrirMenuAcciones) ya
+     manejan su propio cierre por su cuenta — si este oyente también
+     los cerrara, se cerrarían en el MISMO clic que los abre (porque
+     el clic en el botón "⋮" burbujea hasta aquí). Por eso se excluye
+     cualquier clic sobre un botón disparador de esos menús: todos
+     llevan aria-expanded, sea cual sea su nombre de clase/atributo. */
+  if (!e.target.closest('.cuenta') && !e.target.closest('.menu-fila') && !e.target.closest('[aria-expanded]')) {
+    cerrarMenus();
+  }
 });
 
 document.addEventListener('keydown', e => {
@@ -299,7 +401,61 @@ async function api(url, opciones = {}){
     headers: { 'Content-Type': 'application/json' },
     ...opciones
   });
+
+  const tipo = respuesta.headers.get('content-type') || '';
+  if (!tipo.includes('application/json')) {
+    /* Si el servidor responde HTML (normalmente la página de error
+       404 de Express) en vez de JSON, es casi siempre porque esa
+       ruta todavía no existe en el server.js/rutas/controlador que
+       tienes corriendo — un archivo quedó desactualizado. Este
+       mensaje lo dice claro en vez del críptico "Unexpected token
+       '<'" que da JSON.parse al intentar leer HTML como si fuera JSON. */
+    throw new Error(
+      `El servidor respondió algo que no es JSON (código ${respuesta.status}) en "${url}". ` +
+      `Es muy probable que esa ruta no exista todavía en tu server.js/rutas — revisa que tengas ` +
+      `los archivos más recientes y reinicia el servidor (Ctrl+C y node server.js de nuevo).`
+    );
+  }
+
   const datos = await respuesta.json();
   if (!respuesta.ok) throw new Error(datos.mensaje || 'Error en la solicitud.');
   return datos;
 }
+
+/* Si llegamos aquí porque nos rebotaron de un módulo sin permiso
+   (ver verificarAccesoPaginaActual, arriba), mostramos el aviso una
+   vez y limpiamos la URL para que un refresh no lo repita. Esto va
+   HASTA ABAJO del archivo a propósito: usa avisar(), que se define
+   más arriba pero después del punto donde se carga la sesión. */
+(function avisarSinAcceso(){
+  const parametros = new URLSearchParams(location.search);
+  const modulo = parametros.get('sinacceso');
+  if (!modulo) return;
+  avisar('Tu rol no tiene acceso al módulo de ' + modulo + '.');
+  parametros.delete('sinacceso');
+  const resto = parametros.toString();
+  history.replaceState(null, '', location.pathname + (resto ? '?' + resto : ''));
+})();
+
+/* Que se pueda abrir el calendario haciendo clic en CUALQUIER parte
+   del campo de fecha, no solo en el iconito chiquito de la derecha
+   (que además ahora vino más grande, ver panel.css). Chrome/Edge
+   soportan showPicker(); si el navegador no lo tiene, no truena, el
+   campo simplemente sigue funcionando como cualquier input normal
+   (haciendo clic en el ícono, como siempre). Esto se vuelve a
+   ejecutar automáticamente cada vez que la página agrega inputs de
+   fecha nuevos (por ejemplo, al abrir el formulario de un empleado
+   o el expediente), gracias al MutationObserver de abajo. */
+function activarClicEnFechas(raiz){
+  raiz.querySelectorAll('input[type="date"]:not([data-click-fecha])').forEach(input => {
+    input.dataset.clickFecha = '1';
+    input.addEventListener('click', () => {
+      if (input.readOnly || input.disabled) return;
+      if (typeof input.showPicker === 'function') {
+        try { input.showPicker(); } catch (e) { /* algunos navegadores lo bloquean sin foco previo */ }
+      }
+    });
+  });
+}
+activarClicEnFechas(document);
+new MutationObserver(() => activarClicEnFechas(document)).observe(document.body, { childList:true, subtree:true });

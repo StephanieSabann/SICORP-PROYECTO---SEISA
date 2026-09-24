@@ -60,6 +60,14 @@
           </svg>
           <span>Reportes</span>
         </button>
+        <button class="menu-item" data-modulo="Usuarios">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="9" cy="8.5" r="3.4" />
+            <path d="M2.6 20c.8-3.4 3.4-5.3 6.4-5.3s5.6 1.9 6.4 5.3" />
+            <path d="M16.3 5.4a3.3 3.3 0 0 1 0 6.4M17.8 15c2 .8 3.3 2.5 3.6 5" />
+          </svg>
+          <span>Usuarios</span>
+        </button>
       </nav>
 
       <svg class="deco" viewBox="0 0 300 260" fill="none" aria-hidden="true">
@@ -114,13 +122,12 @@
               </svg>
               Cuenta
             </button>
-            <button role="menuitem" data-ir="usuarios">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-                <circle cx="9" cy="8.5" r="3.4" />
-                <path d="M2.6 20c.8-3.4 3.4-5.3 6.4-5.3s5.6 1.9 6.4 5.3" />
-                <path d="M16.3 5.4a3.3 3.3 0 0 1 0 6.4M17.8 15c2 .8 3.3 2.5 3.6 5" />
+            <button role="menuitem" data-ir="mantenimiento">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 3.5a4.5 4.5 0 0 0 5.9 5.9L21 9l-9.5 9.5a3 3 0 1 1-4.2-4.2L16 6l-1.5-2.5z" />
+                <path d="M6.5 17.5h.01" />
               </svg>
-              Usuarios
+              Soporte y Mantenimiento
             </button>
             <button role="menuitem" id="btnSalir">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
@@ -206,6 +213,26 @@
                 <h3>Reportes</h3>
                 <div class="pie-fila">
                   <p>Informes operativos y administrativos.</p>
+                  <span class="flecha">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M4 12h15M13 6l6 6-6 6" />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </article>
+
+            <!-- Tarjeta de Usuarios: la imagen es un ícono provisional
+                 (img/mod-usuarios.png). Si tienes una imagen propia que
+                 combine mejor con las otras 4, solo reemplaza ese archivo
+                 conservando el mismo nombre. -->
+            <article class="modulo" data-modulo="Usuarios">
+              <img src="img/mod-usuarios.png" alt="">
+              <div class="pie">
+                <h3>Usuarios</h3>
+                <div class="pie-fila">
+                  <p>Cuentas, roles y accesos del sistema.</p>
                   <span class="flecha">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                       stroke-linejoin="round">

@@ -60,6 +60,14 @@
           </svg>
           <span>Reportes</span>
         </button>
+        <button class="menu-item" data-modulo="Usuarios">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="9" cy="8.5" r="3.4" />
+            <path d="M2.6 20c.8-3.4 3.4-5.3 6.4-5.3s5.6 1.9 6.4 5.3" />
+            <path d="M16.3 5.4a3.3 3.3 0 0 1 0 6.4M17.8 15c2 .8 3.3 2.5 3.6 5" />
+          </svg>
+          <span>Usuarios</span>
+        </button>
       </nav>
 
       <svg class="deco" viewBox="0 0 300 260" fill="none" aria-hidden="true">
@@ -114,13 +122,12 @@
               </svg>
               Cuenta
             </button>
-            <button role="menuitem" data-ir="usuarios">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-                <circle cx="9" cy="8.5" r="3.4" />
-                <path d="M2.6 20c.8-3.4 3.4-5.3 6.4-5.3s5.6 1.9 6.4 5.3" />
-                <path d="M16.3 5.4a3.3 3.3 0 0 1 0 6.4M17.8 15c2 .8 3.3 2.5 3.6 5" />
+            <button role="menuitem" data-ir="mantenimiento">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 3.5a4.5 4.5 0 0 0 5.9 5.9L21 9l-9.5 9.5a3 3 0 1 1-4.2-4.2L16 6l-1.5-2.5z" />
+                <path d="M6.5 17.5h.01" />
               </svg>
-              Usuarios
+              Soporte y Mantenimiento
             </button>
             <button role="menuitem" id="btnSalir">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
@@ -272,17 +279,18 @@
               <h3>Datos del empleado</h3>
               <label class="campo">
                 <span>Nombre completo <i class="obligatorio">*</i></span>
-                <input type="text" id="fNombre" placeholder="Nombre y apellidos">
+                <input type="text" id="fNombre" placeholder="Nombre y apellidos" maxlength="101">
+                <small class="contador" id="contadorNombre"></small>
                 <em class="error">Escribe el nombre completo.</em>
               </label>
               <label class="campo">
                 <span>DPI <i class="obligatorio">*</i></span>
-                <input type="text" id="fDpi" placeholder="0000 00000 0000">
+                <input type="text" id="fDpi" placeholder="0000 00000 0000" maxlength="13">
                 <em class="error">Escribe un DPI válido (13 dígitos).</em>
               </label>
               <label class="campo">
                 <span>NIT (opcional)</span>
-                <input type="text" id="fNit" placeholder="00000000-0">
+                <input type="text" id="fNit" placeholder="Solo números, sin guion" maxlength="9" inputmode="numeric">
               </label>
               <label class="campo">
                 <span>Fecha de nacimiento <i class="obligatorio">*</i></span>
@@ -291,16 +299,17 @@
               </label>
               <label class="campo">
                 <span>Teléfono <i class="obligatorio">*</i></span>
-                <input type="text" id="fTelefono" placeholder="0000-0000">
+                <input type="text" id="fTelefono" placeholder="0000-0000" maxlength="20">
                 <em class="error">Escribe un teléfono de 8 dígitos.</em>
               </label>
               <label class="campo">
                 <span>Correo electrónico (opcional)</span>
-                <input type="email" id="fCorreo" placeholder="correo@seisa.com.gt">
+                <input type="email" id="fCorreo" placeholder="correo@seisa.com.gt" maxlength="60">
               </label>
               <label class="campo">
                 <span>Dirección de residencia <i class="obligatorio">*</i></span>
-                <input type="text" id="fDireccion" placeholder="Dirección completa">
+                <input type="text" id="fDireccion" placeholder="Dirección completa" maxlength="100">
+                <small class="contador" id="contadorDireccion"></small>
                 <em class="error">Escribe la dirección de residencia.</em>
               </label>
             </div>
@@ -401,7 +410,7 @@
                 <button type="button" class="btn-linea chico quitar" id="btnQuitarFotoExp" hidden>Quitar foto</button>
                 <input type="file" id="inputFotoExp" accept="image/*" hidden>
               </div>
-              <input type="text" id="expNombre" class="nombre-editable" value="—" readonly aria-label="Nombre completo">
+              <input type="text" id="expNombre" class="nombre-editable" value="—" readonly aria-label="Nombre completo" maxlength="101">
               <span class="codigo" id="expCodigo">EMP-000</span>
               <i class="etiqueta activo" id="expEstado">Activo</i>
               <div class="datos-perfil">
@@ -433,12 +442,12 @@
                   1. Datos personales
                 </h4>
                 <div class="datos">
-                  <div class="dato"><span>DPI:</span><input id="dDpi" readonly></div>
-                  <div class="dato"><span>Teléfono:</span><input id="dTelefono" readonly></div>
-                  <div class="dato"><span>NIT:</span><input id="dNit" readonly></div>
-                  <div class="dato"><span>Correo electrónico:</span><input id="dCorreo" readonly></div>
+                  <div class="dato"><span>DPI:</span><input id="dDpi" readonly maxlength="13"></div>
+                  <div class="dato"><span>Teléfono:</span><input id="dTelefono" readonly maxlength="20"></div>
+                  <div class="dato"><span>NIT:</span><input id="dNit" readonly maxlength="9" inputmode="numeric"></div>
+                  <div class="dato"><span>Correo electrónico:</span><input id="dCorreo" readonly maxlength="60"></div>
                   <div class="dato"><span>Fecha de nacimiento:</span><input id="dNacimiento" type="date" readonly></div>
-                  <div class="dato"><span>Dirección:</span><input id="dDireccion" readonly></div>
+                  <div class="dato"><span>Dirección:</span><input id="dDireccion" readonly maxlength="100"></div>
                 </div>
               </div>
 
@@ -484,12 +493,16 @@
               <div class="cifra"><b class="conteo" id="permTotal">0</b><span>Registrados</span></div>
               <div class="cifra activos"><b class="conteo" id="permAprobados">0</b><span>Aprobados</span></div>
               <div class="cifra" style="border-color:#E0A82E22"><b class="conteo" id="permPendientes" style="color:#E0A82E">0</b><span>Pendientes</span></div>
+              <div class="cifra" id="cifraDisponibles" style="border-color:#3FB6E822">
+                <b class="conteo" id="permDisponibles" style="color:#3FB6E8">—</b>
+                <span>📅 Días de vacaciones disponibles (<span id="permAnio"></span>)</span>
+              </div>
             </div>
 
             <div class="tabla tabla-permisos">
               <div class="fila encabezado">
                 <span>Tipo</span>
-                <span>Desde</span>
+                <span>📅 Desde</span>
                 <span>Días</span>
                 <span>Motivo</span>
                 <span>Estado</span>
@@ -499,31 +512,32 @@
               <p class="vacio" id="sinPermisos" hidden>Este empleado todavía no tiene permisos registrados.</p>
             </div>
 
+            <p class="aviso-sin-dias" id="avisoSinDias" hidden>
+              ⚠️ Este empleado ya no tiene días de vacaciones disponibles este año. Puede seguir pidiendo otros tipos de permiso.
+            </p>
+
             <form class="form-permiso" id="formPermiso">
               <label class="campo">
                 <span>Tipo</span>
-                <select id="pTipo">
-                  <option>Vacaciones</option>
-                  <option>Permiso personal</option>
-                  <option>Incapacidad (IGSS)</option>
-                  <option>Día festivo compensado</option>
-                </select>
+                <select id="pTipo"></select>
               </label>
               <label class="campo">
-                <span>Desde</span>
+                <span>📅 Desde</span>
                 <input type="date" id="pDesde">
               </label>
               <label class="campo">
-                <span>Hasta</span>
+                <span>📅 Hasta</span>
                 <input type="date" id="pHasta">
               </label>
               <label class="campo">
                 <span>Motivo</span>
-                <input type="text" id="pMotivo" placeholder="Detalle breve">
+                <input type="text" id="pMotivo" placeholder="Detalle breve" maxlength="30">
+                <small class="contador" id="contadorMotivo"></small>
               </label>
               <button type="submit" class="btn-rojo">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
                 Registrar
+
               </button>
             </form>
           </section>

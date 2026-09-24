@@ -81,10 +81,31 @@ async function eliminarRol(id) {
     return resultado.recordset[0];
 }
 
+async function establecerAccesosDeRol(idRol, idsAcceso) {
+    const pool = await obtenerPool();
+
+    /* Reemplaza TODA la lista de accesos del rol de una vez: borra lo
+       que tenía y mete lo nuevo que se marcó en el checklist. Más
+       simple y predecible que ir comparando qué se agregó o se quitó. */
+    await pool.request()
+        .input("id_rol", sql.Int, idRol)
+        .query(`DELETE FROM rol_acceso WHERE id_rol = @id_rol`);
+
+    for (const idAcceso of idsAcceso) {
+        await pool.request()
+            .input("id_rol", sql.Int, idRol)
+            .input("id_acceso", sql.Int, idAcceso)
+            .query(`INSERT INTO rol_acceso (id_rol, id_acceso) VALUES (@id_rol, @id_acceso)`);
+    }
+
+    return obtenerAccesosPorRolId(idRol);
+}
+
 module.exports = {
     obtenerTodosLosRoles,
     obtenerRolPorId,
     obtenerAccesosPorRolId,
+    establecerAccesosDeRol,
     crearRol,
     actualizarRol,
     eliminarRol

@@ -29,8 +29,18 @@ async function api(url, metodo = 'GET', cuerpo = null) {
     opciones.body = JSON.stringify(cuerpo);
   }
   const res = await fetch(url, opciones);
-  if (!res.ok) throw new Error('Error en la llamada a la API');
-  return metodo === 'GET' ? await res.json() : null;
+
+  /* Siempre se intenta leer el cuerpo de la respuesta (aunque no sea
+     GET), porque ahí es donde el backend manda el mensaje real del
+     error (por ejemplo "El nombre no puede superar los 50 caracteres").
+     Antes esto se descartaba y solo se veía un mensaje genérico. */
+  let datos = null;
+  try { datos = await res.json(); } catch (e) { /* respuesta sin cuerpo */ }
+
+  if (!res.ok) {
+    throw new Error((datos && datos.mensaje) || `Error en la llamada a la API (${res.status}).`);
+  }
+  return datos;
 }
 
 /* ---------------- Cargar Datos desde la API ---------------- */
@@ -347,6 +357,24 @@ const fCampos = {
   unidad: document.getElementById('fUnidad')
 };
 let tipoSeleccionado = 'Técnico';
+
+/* Contador de caracteres para los campos que tienen un límite corto
+   en la base de datos (nombre completo y dirección). Se pone amarillo
+   cerca del límite y rojo al llegar al tope. */
+function activarContador(input, elementoContador){
+  if (!input || !elementoContador) return;
+  const maximo = Number(input.getAttribute('maxlength')) || 0;
+  const actualizar = () => {
+    const usados = input.value.length;
+    elementoContador.textContent = `${usados} / ${maximo}`;
+    elementoContador.classList.toggle('cerca', usados >= maximo * 0.85 && usados < maximo);
+    elementoContador.classList.toggle('lleno', usados >= maximo);
+  };
+  input.addEventListener('input', actualizar);
+  actualizar();
+}
+activarContador(document.getElementById('fNombre'), document.getElementById('contadorNombre'));
+activarContador(document.getElementById('fDireccion'), document.getElementById('contadorDireccion'));
 let editandoCodigo = null;
 
 document.querySelectorAll('#segmentadoTipo [data-tipo]').forEach(b => {
@@ -475,7 +503,8 @@ formEmpleado.addEventListener('submit', async e => { // Agregamos 'async'
     'Auxiliar': 3
   };
 
-  // 2. Preparar el objeto con los datos que espera tu SQL[cite: 1]
+  // 2. Preparar el objeto con los datos que espera tu SQL
+  const valorNit = fCampos.nit.value.trim();
   const datosDB = {
   id_puesto: mapaPuestos[tipoSeleccionado] || 1, // Se envía como número entero positivo
   nombre: nombreDB,
@@ -487,7 +516,7 @@ formEmpleado.addEventListener('submit', async e => { // Agregamos 'async'
   email: fCampos.correo.value.trim(),
   fecha_contratacion: fCampos.ingreso.value,
   activo: true,
-  fecha_nacimiento: fCampos.ingreso.value
+  fecha_nacimiento: fCampos.nacimiento.value
 };
 
   try {
@@ -517,7 +546,10 @@ formEmpleado.addEventListener('submit', async e => { // Agregamos 'async'
 
   } catch (error) {
     console.error('Error al enviar el formulario:', error);
-    avisar('Hubo un problema al guardar el empleado. Intenta nuevamente.');
+    /* Se muestra el mensaje real que manda el servidor (por ejemplo
+       "El nombre no puede superar los 50 caracteres") en vez de uno
+       genérico, para saber exactamente qué corregir. */
+    avisar(error.message || 'Hubo un problema al guardar el empleado. Intenta nuevamente.');
   }
 });
 document.getElementById('btnAceptar').addEventListener('click', () => {
@@ -691,6 +723,7 @@ document.getElementById('btnGuardarExp').addEventListener('click', async () => {
   const tipoSeleccionado = document.getElementById('expTipo').value;
 
   // 3. Preparar objeto para SQL
+  const valorNitExp = document.getElementById('dNit').value.trim();
   const datosDB = {
     nombre: nombreDB,
     apellido: apellidoDB,
@@ -726,18 +759,50 @@ document.getElementById('btnGuardarExp').addEventListener('click', async () => {
 
   } catch (error) {
     console.error('Error al actualizar expediente:', error);
-    avisar('No se pudieron guardar los cambios en el servidor.');
+    avisar(error.message || 'No se pudieron guardar los cambios en el servidor.');
   }
 });
 
 /* ============================================================
    Permisos y descansos (dentro del expediente)
    ============================================================ */
-function pintarPermisos(){
-  const emp = empleados.find(e => e.codigo === codigoActual);
+let tiposPermisoCache = null;
+
+async function cargarTiposPermiso(){
+  if (tiposPermisoCache) return tiposPermisoCache;
+  try {
+    const r = await api('/api/permisos/tipos');
+    tiposPermisoCache = r.datos || [];
+  } catch (error) {
+    console.warn('No se pudieron cargar los tipos de permiso:', error);
+    tiposPermisoCache = [];
+  }
+  const select = document.getElementById('pTipo');
+  select.innerHTML = tiposPermisoCache.length
+    ? tiposPermisoCache.map(t => `<option value="${t.id_tipo}">${escapar(t.nombre)}</option>`).join('')
+    : '<option value="">No se pudieron cargar los tipos</option>';
+  return tiposPermisoCache;
+}
+
+function nombreTipoPermiso(idTipo){
+  const t = (tiposPermisoCache || []).find(x => x.id_tipo === idTipo);
+  return t ? t.nombre : 'Tipo ' + idTipo;
+}
+
+async function pintarPermisos(){
   const cont = document.getElementById('listaPermisos');
   const vacio = document.getElementById('sinPermisos');
-  const permisos = (emp.permisos || []).slice().sort((a,b) => (b.desde||'').localeCompare(a.desde||''));
+  await cargarTiposPermiso();
+
+  let permisos = [];
+  try {
+    const r = await api('/api/permisos?empleado=' + codigoActual);
+    permisos = r.datos || [];
+  } catch (error) {
+    cont.innerHTML = `<p class="vacio-mini">No se pudieron cargar los permisos: ${escapar(error.message)}</p>`;
+    vacio.hidden = true;
+    return;
+  }
 
   cont.innerHTML = '';
   vacio.hidden = permisos.length > 0;
@@ -746,60 +811,103 @@ function pintarPermisos(){
     const fila = document.createElement('div');
     fila.className = 'fila';
     fila.innerHTML = `
-      <span>${escapar(p.tipo)}</span>
-      <span>${fechaBonita(p.desde)}</span>
+      <span>${escapar(p.tipo_nombre)}</span>
+      <span>📅 ${fechaBonita(p.desde)}</span>
       <span>${diasEntre(p.desde, p.hasta)}</span>
       <span>${escapar(p.motivo || '—')}</span>
-      <span><i class="estado-permiso ${p.estado}">${p.estado.charAt(0).toUpperCase() + p.estado.slice(1)}</i></span>
+      <span><i class="estado-permiso ${p.estado_texto}">${p.estado_texto.charAt(0).toUpperCase() + p.estado_texto.slice(1)}</i></span>
       <span class="acciones-fila">
-        ${p.estado === 'pendiente' ? `
+        ${p.estado_texto === 'pendiente' ? `
           <button type="button" class="icono-btn" data-a="aprobar" aria-label="Aprobar"><svg viewBox="0 0 24 24" fill="none" stroke="#18BE2D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></button>
           <button type="button" class="icono-btn" data-a="rechazar" aria-label="Rechazar"><svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>` : ''}
         <button type="button" class="icono-btn" data-a="eliminar" aria-label="Eliminar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"/></svg></button>
       </span>`;
     fila.querySelectorAll('[data-a]').forEach(b => {
-      b.addEventListener('click', () => accionPermiso(b.dataset.a, p.id));
+      b.addEventListener('click', () => accionPermiso(b.dataset.a, p.id_permiso, p.tipo_nombre));
     });
     cont.appendChild(fila);
   });
 
   contar(document.getElementById('permTotal'), permisos.length);
-  contar(document.getElementById('permAprobados'), permisos.filter(p => p.estado === 'aprobado').length);
-  contar(document.getElementById('permPendientes'), permisos.filter(p => p.estado === 'pendiente').length);
+  contar(document.getElementById('permAprobados'), permisos.filter(p => p.estado_texto === 'aprobado').length);
+  contar(document.getElementById('permPendientes'), permisos.filter(p => p.estado_texto === 'pendiente').length);
+
+  await pintarDiasDisponibles();
 }
 
-function accionPermiso(accion, id){
-  const emp = empleados.find(e => e.codigo === codigoActual);
-  const p = emp.permisos.find(x => x.id === id);
-  if (!p) return;
+async function pintarDiasDisponibles(){
+  try {
+    const r = await api('/api/permisos/limite?empleado=' + codigoActual);
+    const d = r.datos;
+    document.getElementById('permAnio').textContent = d.anio;
+    contar(document.getElementById('permDisponibles'), d.dias_disponibles);
+    document.getElementById('avisoSinDias').hidden = d.dias_disponibles > 0;
+  } catch (error) {
+    console.warn('No se pudo cargar el límite de vacaciones:', error);
+    document.getElementById('permDisponibles').textContent = '—';
+  }
+}
 
-  if (accion === 'aprobar'){ p.estado = 'aprobado'; guardarTodos(); pintarPermisos(); avisar('Permiso aprobado.'); return; }
-  if (accion === 'rechazar'){ p.estado = 'rechazado'; guardarTodos(); pintarPermisos(); avisar('Permiso rechazado.'); return; }
+function accionPermiso(accion, id, tipoNombre){
+  if (accion === 'aprobar'){
+    api('/api/permisos/' + id + '/estado', 'PATCH', { aprobado: true })
+      .then(() => { avisar('Permiso aprobado.'); pintarPermisos(); })
+      .catch(error => avisar(error.message || 'No se pudo aprobar el permiso.'));
+    return;
+  }
+  if (accion === 'rechazar'){
+    api('/api/permisos/' + id + '/estado', 'PATCH', { aprobado: false })
+      .then(() => { avisar('Permiso rechazado.'); pintarPermisos(); })
+      .catch(error => avisar(error.message || 'No se pudo rechazar el permiso.'));
+    return;
+  }
   if (accion === 'eliminar'){
-    confirmar('¿Eliminar este permiso?', 'El registro de ' + p.tipo.toLowerCase() + ' se borrará del expediente.', 'Eliminar', () => {
-      emp.permisos = emp.permisos.filter(x => x.id !== id);
-      guardarTodos(); pintarPermisos(); avisar('Permiso eliminado.');
+    confirmar('¿Eliminar este permiso?', 'El registro de ' + tipoNombre.toLowerCase() + ' se borrará del expediente.', 'Eliminar', () => {
+      api('/api/permisos/' + id, 'DELETE')
+        .then(() => { avisar('Permiso eliminado.'); pintarPermisos(); })
+        .catch(error => avisar(error.message || 'No se pudo eliminar el permiso.'));
     });
   }
 }
 
-document.getElementById('formPermiso').addEventListener('submit', e => {
+/* Contador de caracteres del motivo (máximo 30, es lo que permite la BD) */
+(function activarContadorMotivo(){
+  const campo = document.getElementById('pMotivo');
+  const contador = document.getElementById('contadorMotivo');
+  const maximo = Number(campo.getAttribute('maxlength')) || 0;
+  const actualizar = () => {
+    const usados = campo.value.length;
+    contador.textContent = `${usados} / ${maximo}`;
+    contador.classList.toggle('cerca', usados >= maximo * 0.85 && usados < maximo);
+    contador.classList.toggle('lleno', usados >= maximo);
+  };
+  campo.addEventListener('input', actualizar);
+  actualizar();
+})();
+
+document.getElementById('formPermiso').addEventListener('submit', async e => {
   e.preventDefault();
-  const tipo = document.getElementById('pTipo').value;
+  const id_tipo = Number(document.getElementById('pTipo').value);
   const desde = document.getElementById('pDesde').value;
   const hasta = document.getElementById('pHasta').value;
   const motivo = document.getElementById('pMotivo').value.trim();
 
+  if (!id_tipo){ avisar('Selecciona el tipo de permiso.'); return; }
   if (!desde || !hasta){ avisar('Indica las fechas del permiso.'); return; }
   if (hasta < desde){ avisar('La fecha "hasta" no puede ser anterior a "desde".'); return; }
+  if (!motivo){ avisar('Escribe el motivo.'); return; }
 
-  const emp = empleados.find(e => e.codigo === codigoActual);
-  const idNuevo = (emp.permisos.reduce((m,p) => Math.max(m, p.id||0), 0)) + 1;
-  emp.permisos.push({ id: idNuevo, tipo, desde, hasta, motivo, estado: 'pendiente' });
-  guardarTodos();
-  e.target.reset();
-  pintarPermisos();
-  avisar('Permiso registrado y en espera de aprobación.');
+  try {
+    const r = await api('/api/permisos', 'POST', { id_empleado: codigoActual, id_tipo, desde, hasta, motivo });
+    e.target.reset();
+    document.getElementById('contadorMotivo').textContent = '0 / 30';
+    pintarPermisos();
+    avisar(r.mensaje || 'Permiso registrado y en espera de aprobación.');
+  } catch (error) {
+    /* Aquí es donde sale el aviso de "ya no puede pedir más
+       vacaciones" cuando se acabó el límite del año. */
+    avisar(error.message || 'No se pudo registrar el permiso.');
+  }
 });
 
 /* ============================================================

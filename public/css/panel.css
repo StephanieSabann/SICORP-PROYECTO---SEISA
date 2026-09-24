@@ -72,6 +72,14 @@ button{cursor:pointer}
   font-size:clamp(15px,1.25vw,22px);text-align:left;width:100%;
 }
 .menu-item svg{width:clamp(20px,1.7vw,28px);height:clamp(20px,1.7vw,28px);flex:0 0 auto}
+/* Punto 4: módulo que el rol de esta persona no tiene permitido —
+   se ve apagado y con el cursor de "no permitido", pero se deja ahí
+   (en vez de desaparecer del todo) para que quede claro que existe
+   pero no le corresponde, no que el sistema esté roto. */
+[data-modulo].sin-acceso{opacity:.4;cursor:not-allowed}
+.menu-item.sin-acceso:hover{background:none;transform:none}
+.modulo.sin-acceso:hover{transform:none;box-shadow:none}
+.modulo.sin-acceso{filter:grayscale(.6)}
 .menu-item::before{
   content:"";position:absolute;left:0;top:18%;bottom:18%;width:3px;border-radius:3px;
   background:var(--rojo-vivo);transform:scaleY(0);transform-origin:center;
@@ -137,7 +145,14 @@ button{cursor:pointer}
   overflow:hidden;
 }
 .contenido::before{
-  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  /* Antes era z-index:0 — en páginas donde el título/texto no está
+     envuelto en una tarjeta con su propio position:relative (como
+     mantenimiento.html), este degradado se pintaba ENCIMA del texto
+     y lo dejaba invisible aunque el color y el layout estuvieran
+     bien. Con -1 queda garantizado detrás de todo el contenido
+     normal de .contenido, sin depender de que cada hijo tenga su
+     propio contexto de apilamiento. */
   background:
     radial-gradient(44% 40% at 78% 6%,rgba(15,92,150,.30),transparent 70%),
     radial-gradient(40% 38% at 20% 96%,rgba(179,49,47,.22),transparent 72%),
@@ -146,11 +161,11 @@ button{cursor:pointer}
 .vista{position:relative;z-index:1;display:none}
 .vista.is-active{display:block}
 
-.vista h1{
+.vista h1, main.contenido > h1{
   font-family:var(--serif);font-weight:400;margin:0;
   font-size:clamp(28px,3.4vw,58px);line-height:1.1;
 }
-.vista .sub{font-family:var(--serif);color:#C9D5E1;margin:6px 0 clamp(18px,2.4vw,36px);font-size:clamp(14px,1.3vw,23px)}
+.vista .sub, main.contenido > p.sub{font-family:var(--serif);color:#C9D5E1;margin:6px 0 clamp(18px,2.4vw,36px);font-size:clamp(14px,1.3vw,23px)}
 
 /* ---------- inicio ---------- */
 .saludo{display:flex;align-items:flex-start;justify-content:space-between;gap:clamp(16px,3vw,50px)}
@@ -190,6 +205,12 @@ button{cursor:pointer}
   font-family:var(--serif);font-weight:400;font-size:clamp(18px,1.8vw,30px);
 }
 .cabecera svg{width:clamp(22px,1.9vw,32px);height:clamp(22px,1.9vw,32px);flex:0 0 auto}
+.chip-archivados{
+  margin-left:auto;display:flex;align-items:center;gap:8px;
+  font-family:var(--sans);font-weight:400;font-size:clamp(12.5px,1vw,15px);color:var(--tenue);
+  cursor:pointer;user-select:none;
+}
+.chip-archivados input{width:16px;height:16px;accent-color:var(--rojo-vivo);cursor:pointer}
 .tarjeta .cabecera + .cabecera,
 .nota + .cabecera{margin-top:clamp(16px,2vw,30px)}
 
@@ -291,14 +312,21 @@ select option{background:#12171E;color:var(--texto)}
 /* ---------- formulario ---------- */
 .rejilla{display:grid;grid-template-columns:1fr 1fr;gap:clamp(12px,1.4vw,24px) clamp(14px,2vw,34px)}
 .campo{display:flex;flex-direction:column;gap:6px}
+/* Contador de caracteres que avisa cuando te acercas al límite que
+   tiene la columna en la base de datos (evita el error de "no se
+   pudo guardar" por un texto demasiado largo). */
+.contador{align-self:flex-end;font-size:12px;color:var(--tenue);margin-top:-2px}
+.contador.cerca{color:#E0A82E}
+.contador.lleno{color:#F08A86;font-weight:600}
 .campo.ancho{grid-column:1/-1}
 .campo>span{font-family:var(--serif);font-size:clamp(13px,1.1vw,19px);color:#DCE6F0}
-.campo input,.campo select{
+.campo input,.campo select,.campo textarea{
   width:100%;background:var(--panel-2);border:1px solid var(--linea);border-radius:10px;
   color:var(--texto);font-family:var(--serif);font-size:clamp(13px,1.1vw,19px);
   height:clamp(40px,3.6vw,58px);padding:0 16px;
 }
-.campo input::placeholder{color:#6C7A88}
+.campo textarea{height:auto;min-height:90px;padding:12px 16px;resize:vertical;line-height:1.5}
+.campo input::placeholder,.campo textarea::placeholder{color:#6C7A88}
 .campo input:focus,.campo select:focus,.buscador:focus-within,.campo-busca:focus-within{
   outline:none;border-color:var(--azul);box-shadow:0 0 0 3px rgba(6,137,188,.18);
 }
@@ -368,6 +396,9 @@ select option{background:#12171E;color:var(--texto)}
 .ficha strong{display:block;font-family:var(--serif);font-weight:400;font-size:clamp(16px,1.5vw,26px)}
 .ficha small{font-family:var(--serif);color:var(--tenue);font-size:clamp(12px,1vw,17px)}
 .acciones-modal{display:flex;justify-content:center;gap:14px}
+.acciones-modal-mensaje{flex-wrap:wrap}
+.acciones-modal-mensaje .btn-linea,.acciones-modal-mensaje .btn-rojo{display:inline-flex;align-items:center;gap:8px}
+.acciones-modal-mensaje svg{width:18px;height:18px}
 
 .aviso{
   position:fixed;left:50%;bottom:34px;transform:translate(-50%,140%);
@@ -463,6 +494,29 @@ select option{background:#12171E;color:var(--texto)}
 .btn-linea:hover{border-color:var(--texto);background:rgba(255,255,255,.06);transform:translateY(-3px)}
 .campo input,.campo select,select,.campo-busca,.buscador{transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
 .campo input:focus,.campo select:focus{transform:translateY(-2px)}
+/* Ícono del calendario en los campos de fecha: por defecto el
+   navegador lo pinta negro y chiquito — casi invisible sobre estos
+   fondos oscuros. Se agranda y se aclara para que se note que ahí se
+   hace clic para elegir la fecha. Funciona en Chrome/Edge (el
+   selector ::-webkit-calendar-picker-indicator es de esos
+   navegadores; en Firefox el input de fecha ya se ve distinto por
+   defecto y no lo necesita). */
+input[type="date"]{position:relative;cursor:pointer}
+input[type="date"]::-webkit-calendar-picker-indicator{
+  filter:invert(52%) sepia(80%) saturate(1000%) hue-rotate(165deg) brightness(105%);
+  width:22px;height:22px;padding:2px;margin-right:2px;
+  cursor:pointer;border-radius:6px;opacity:.9;
+  transition:opacity .2s ease,background .2s ease;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover{
+  opacity:1;background:rgba(63,182,232,.18);
+}
+/* Los campos de fecha "solo lectura" (los del expediente antes de
+   darle Editar) no deben abrir el calendario ni verse clicables. */
+input[type="date"][readonly]{cursor:default}
+input[type="date"][readonly]::-webkit-calendar-picker-indicator{
+  opacity:.35;cursor:default;pointer-events:none;
+}
 /* Modo "solo ver" (usuarios.js): que se lea igual de bien que si no
    estuviera deshabilitado, solo que no se pueda tocar. */
 .campo input:disabled,.campo select:disabled{
@@ -835,3 +889,121 @@ select option{background:#12171E;color:var(--texto)}
   .vistas-toggle button{flex:1;justify-content:center}
   .form-permiso{grid-template-columns:1fr}
 }
+
+/* ============================================================
+   SOPORTE Y MANTENIMIENTO
+   ============================================================ */
+.tabs-mant{
+  display:flex;flex-wrap:wrap;gap:clamp(6px,.8vw,10px);
+  border-bottom:1px solid var(--linea);margin:clamp(16px,2vw,28px) 0 clamp(20px,2.4vw,32px);
+  padding-bottom:2px;
+}
+.tab-mant{
+  position:relative;display:inline-flex;align-items:center;gap:10px;
+  background:none;border:0;color:var(--tenue);
+  padding:clamp(10px,1.1vw,16px) clamp(12px,1.3vw,20px);
+  font-family:var(--serif);font-size:clamp(13px,1.1vw,19px);
+  border-radius:10px 10px 0 0;transition:color .2s ease,background .2s ease;
+}
+.tab-mant svg{width:clamp(16px,1.4vw,22px);height:clamp(16px,1.4vw,22px);flex:0 0 auto}
+.tab-mant:hover{color:var(--texto);background:rgba(255,255,255,.04)}
+.tab-mant.is-on{color:var(--texto);background:var(--panel)}
+.tab-mant.is-on::after{
+  content:"";position:absolute;left:0;right:0;bottom:-2px;height:2px;background:var(--rojo-vivo);
+}
+.tab-mant .burbuja{
+  background:var(--rojo-vivo);color:#fff;border-radius:999px;font-family:var(--sans);
+  font-size:11px;min-width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;
+  padding:0 5px;
+}
+
+.panel-mant{display:none}
+.panel-mant.is-active{display:block;animation:subirCorto .35s ease both}
+
+.rejilla-mant{display:grid;grid-template-columns:1fr 1fr;gap:clamp(14px,1.8vw,26px);align-items:start}
+.pendiente-mant{opacity:.85}
+.pendiente-mant .nota{color:var(--tenue);font-family:var(--serif);line-height:1.6}
+
+.lista-mant{margin-top:clamp(16px,1.8vw,24px);border-top:1px solid var(--linea-2);padding-top:clamp(12px,1.4vw,20px)}
+.lista-mant .fila-mant{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:8px 0;font-family:var(--serif);font-size:clamp(13px,1.05vw,18px);
+}
+.lista-mant .fila-mant + .fila-mant{border-top:1px solid var(--linea-2)}
+.lista-mant .fila-mant small{display:block;color:var(--tenue);font-size:.8em;margin-top:2px}
+.lista-mant .vacio-mini{color:var(--tenue);font-family:var(--serif);font-size:14px;padding:8px 0}
+.vacio-mini{color:var(--tenue);font-family:var(--serif);font-size:14px;padding:8px 0}
+.aviso-sin-dias{
+  background:rgba(224,168,46,.12);border:1px solid rgba(224,168,46,.35);color:#E0A82E;
+  border-radius:10px;padding:10px 14px;font-family:var(--serif);font-size:clamp(12.5px,1vw,15px);
+  margin:0 0 16px;
+}
+
+/* ---------- tabla de mensajes (Soporte) ---------- */
+.tabla-mensajes .fila{grid-template-columns:1.1fr 1.3fr .8fr .7fr 90px}
+.punto-no-leido{width:9px;height:9px;border-radius:50%;background:var(--rojo-vivo);display:inline-block;margin-right:8px}
+.detalle-mensaje{text-align:left;font-family:var(--serif);font-size:clamp(13px,1.1vw,18px);line-height:1.6}
+.detalle-mensaje .campo-detalle{margin-bottom:14px}
+.detalle-mensaje .campo-detalle span{display:block;color:var(--tenue);font-size:.8em;margin-bottom:2px}
+.modal .detalle-mensaje{margin:0 0 clamp(16px,2vw,26px);max-height:340px;overflow-y:auto;text-align:left}
+
+@media (max-width:900px){
+  .rejilla-mant{grid-template-columns:1fr}
+  .tabs-mant{overflow-x:auto;flex-wrap:nowrap}
+  .tab-mant{flex:0 0 auto}
+  .tabla-mensajes .fila{grid-template-columns:1fr 1fr}
+  .tabla-mensajes .fila.encabezado{display:none}
+}
+
+/* ---------- checklist de permisos (nuevo rol / editar accesos) ---------- */
+.checklist-permisos{
+  display:flex;flex-direction:column;gap:8px;margin-top:8px;
+  max-height:220px;overflow-y:auto;padding-right:4px;
+}
+.check-permiso{
+  display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:8px;
+  cursor:pointer;transition:background .15s ease;
+}
+.check-permiso:hover{background:rgba(255,255,255,.04)}
+.check-permiso input{width:17px;height:17px;margin-top:2px;accent-color:var(--rojo-vivo);cursor:pointer;flex:0 0 auto}
+.check-permiso .texto strong{display:block;font-family:var(--serif);font-size:clamp(13px,1.05vw,18px)}
+.check-permiso .texto small{display:block;color:var(--tenue);font-size:.82em;margin-top:1px}
+
+/* ---------- tabla de roles ---------- */
+.tabla-roles .fila{grid-template-columns:1fr 2fr 190px;align-items:center;gap:10px}
+.tabla-roles .acciones-fila{display:flex;gap:8px;justify-content:flex-end}
+.chips-permisos{display:flex;flex-wrap:wrap;gap:6px}
+.chip-permiso{
+  display:inline-block;border:1px solid rgba(63,182,232,.4);color:#8FD4F2;
+  border-radius:999px;padding:2px 10px;font-size:12px;font-family:var(--sans);
+}
+.chip-permiso.vacio{border-color:rgba(240,138,134,.4);color:#F08A86}
+
+/* ---------- tabla de unidades ---------- */
+.tabla-unidades .fila{grid-template-columns:.7fr 1fr 1.4fr .8fr 90px}
+
+/* ---------- modal de mensaje como hilo de chat ---------- */
+.modal-chat{max-width:560px;text-align:left}
+.cabecera-chat{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.cabecera-chat h3{margin:0;text-align:left}
+.sub-chat{margin:4px 0 0;color:var(--tenue);font-family:var(--sans);font-size:13px}
+.acciones-cabecera-chat{display:flex;gap:6px;flex:0 0 auto}
+
+.hilo-chat{
+  max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;
+  padding:4px 4px 8px;
+}
+.burbuja{max-width:82%;padding:10px 14px;border-radius:14px;font-family:var(--serif);font-size:clamp(13px,1.05vw,17px);line-height:1.5}
+.burbuja .quien{display:block;font-family:var(--sans);font-size:11px;color:var(--tenue);margin-bottom:3px}
+.burbuja .cuando{display:block;font-family:var(--sans);font-size:10.5px;color:var(--tenue);margin-top:4px;text-align:right}
+.burbuja.cliente{align-self:flex-start;background:var(--panel-2);border-bottom-left-radius:4px}
+.burbuja.admin{align-self:flex-end;background:rgba(227,69,63,.18);border:1px solid rgba(227,69,63,.3);border-bottom-right-radius:4px}
+.burbuja.admin .cuando{color:#F0AEAC}
+
+.caja-responder-chat{display:flex;gap:10px;align-items:flex-end;margin-top:14px}
+.caja-responder-chat textarea{
+  flex:1;resize:none;background:var(--panel-2);border:1px solid var(--linea);border-radius:12px;
+  color:var(--texto);font-family:var(--serif);font-size:14px;padding:10px 14px;min-height:44px;max-height:110px;
+}
+.caja-responder-chat button{width:44px;height:44px;padding:0;border-radius:50%;flex:0 0 auto;display:grid;place-items:center}
+.caja-responder-chat button svg{width:19px;height:19px}

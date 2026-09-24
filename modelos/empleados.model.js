@@ -57,13 +57,13 @@ async function crear(datos) {
     const resultado = await pool
         .request()
         .input("id_puesto", sql.Int, datos.id_puesto)
-        .input("nombre", sql.VarChar(16), datos.nombre)
-        .input("apellido", sql.VarChar(16), datos.apellido)
+        .input("nombre", sql.VarChar(50), datos.nombre)
+        .input("apellido", sql.VarChar(50), datos.apellido)
         .input("dpi", sql.VarChar(13), datos.dpi)
         .input("nit", sql.Int, datos.nit)
-        .input("direccion", sql.VarChar(24), datos.direccion)
-        .input("telefono", sql.VarChar(16), datos.telefono)
-        .input("email", sql.VarChar(32), datos.email)
+        .input("direccion", sql.VarChar(100), datos.direccion)
+        .input("telefono", sql.VarChar(20), datos.telefono)
+        .input("email", sql.VarChar(60), datos.email)
         .input("fecha_contratacion", sql.Date, datos.fecha_contratacion)
         .input("activo", sql.Bit, datos.activo)
         .input("fecha_nacimiento", sql.Date, datos.fecha_nacimiento)
@@ -106,7 +106,8 @@ async function crear(datos) {
                 @telefono,
                 @email,
                 @fecha_contratacion,
-                @activo
+                @activo,
+                @fecha_nacimiento
             )
         `);
 
@@ -121,13 +122,13 @@ async function actualizar(codigoEmpleado, datos) {
 
     const definiciones = {
         id_puesto: [sql.Int, datos.id_puesto],
-        nombre: [sql.VarChar(16), datos.nombre],
-        apellido: [sql.VarChar(16), datos.apellido],
+        nombre: [sql.VarChar(50), datos.nombre],
+        apellido: [sql.VarChar(50), datos.apellido],
         dpi: [sql.VarChar(13), datos.dpi],
         nit: [sql.Int, datos.nit],
-        direccion: [sql.VarChar(24), datos.direccion],
-        telefono: [sql.VarChar(16), datos.telefono],
-        email: [sql.VarChar(32), datos.email],
+        direccion: [sql.VarChar(100), datos.direccion],
+        telefono: [sql.VarChar(20), datos.telefono],
+        email: [sql.VarChar(60), datos.email],
         fecha_contratacion: [sql.Date, datos.fecha_contratacion],
         activo: [sql.Bit, datos.activo],
         fecha_nacimiento: [sql.Date, datos.fecha_nacimiento],

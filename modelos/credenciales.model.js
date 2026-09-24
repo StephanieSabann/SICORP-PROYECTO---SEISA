@@ -12,17 +12,36 @@ async function obtenerTodas() {
             e.nombre + ' ' + e.apellido AS nombre,
             c.usuario,
             c.Activo,
-            r.nombre AS rol,
-            r.id_rol,
-            STRING_AGG(ca.nombre, ',') AS accesos
+            rolInfo.nombre AS rol,
+            rolInfo.id_rol,
+            accesos.lista AS accesos
         FROM credenciales c
         INNER JOIN Empleado e ON c.codigo_empleado = e.codigo_empleado
-        LEFT JOIN Rol_credencial rc ON c.id_credencial = rc.id_credencial
-        LEFT JOIN Rol r ON rc.id_rol = r.id_rol
-        LEFT JOIN Rol_acceso ra ON r.id_rol = ra.id_rol
-        LEFT JOIN Catalogo_acceso ca ON ra.id_acceso = ca.id_acceso
-        GROUP BY 
-            c.id_credencial, e.nombre, e.apellido, c.usuario, c.Activo, r.nombre, r.id_rol
+        /* Antes esto era un LEFT JOIN normal a Rol_credencial + Rol.
+           Si por cualquier motivo esa tabla tuviera más de una fila
+           para el mismo credencial (aunque sea un dato viejo/erróneo),
+           el JOIN normal multiplicaba TODA la fila del usuario, no
+           solo los accesos — por eso con TOP 1 aquí adentro se toma
+           un solo rol por credencial pase lo que pase, sin duplicar
+           la fila del usuario completo. */
+        OUTER APPLY (
+            SELECT TOP 1 r.id_rol, r.nombre
+            FROM Rol_credencial rc
+            INNER JOIN Rol r ON rc.id_rol = r.id_rol
+            WHERE rc.id_credencial = c.id_credencial
+        ) AS rolInfo
+        OUTER APPLY (
+            /* Y aquí, sin importar cuántas veces se repita el mismo
+               acceso para ese rol, SELECT DISTINCT hace que cada
+               nombre salga UNA sola vez en la lista final. */
+            SELECT STRING_AGG(nombre_unico, ',') AS lista
+            FROM (
+                SELECT DISTINCT ca.nombre AS nombre_unico
+                FROM Rol_acceso ra
+                INNER JOIN Catalogo_acceso ca ON ra.id_acceso = ca.id_acceso
+                WHERE ra.id_rol = rolInfo.id_rol
+            ) AS distintos
+        ) AS accesos
         ORDER BY c.id_credencial DESC
     `);
     return resultado.recordset;

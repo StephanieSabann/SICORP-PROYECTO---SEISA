@@ -67,7 +67,7 @@ Object.keys(reglas).forEach(id => {
   });
 });
 
-form.addEventListener('submit', e => {
+form.addEventListener('submit', async e => {
   e.preventDefault();
   let todoOk = true, primerError = null;
   Object.keys(reglas).forEach(id => {
@@ -76,12 +76,35 @@ form.addEventListener('submit', e => {
   });
   if(!todoOk){ primerError.focus(); return; }
 
-  /* Aquí puedes enviar los datos a tu backend, por ejemplo:
-     fetch('enviar.php', { method:'POST', body:new FormData(form) })  */
-  console.log('Datos del formulario:', Object.fromEntries(new FormData(form)));
+  const boton = form.querySelector('button[type="submit"]');
+  const textoOriginal = boton.innerHTML;
+  boton.disabled = true;
+  boton.textContent = 'Enviando…';
+  document.getElementById('errorEnvio').hidden = true;
 
-  abrirModal();
-  form.reset();
+  try {
+    const datos = Object.fromEntries(new FormData(form));
+    const respuesta = await fetch('/api/mensajes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datos)
+    });
+    const resultado = await respuesta.json().catch(() => ({}));
+    if (!respuesta.ok) throw new Error(resultado.mensaje || 'No se pudo enviar el mensaje.');
+
+    abrirModal();
+    form.reset();
+  } catch (error) {
+    /* Si la tabla "Mensaje" todavía no existe en la base de datos,
+       el servidor va a fallar aquí — se avisa en el mismo formulario
+       en vez de fingir que se envió. */
+    const errorEnvio = document.getElementById('errorEnvio');
+    errorEnvio.textContent = error.message || 'No se pudo enviar el mensaje. Intenta de nuevo más tarde.';
+    errorEnvio.hidden = false;
+  } finally {
+    boton.disabled = false;
+    boton.innerHTML = textoOriginal;
+  }
 });
 
 let ultimoFoco = null;

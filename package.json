@@ -15,6 +15,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "mssql": "^12.7.2"
+    "mssql": "^12.7.2",
+    "nodemailer": "^10.0.10"
   }
 }

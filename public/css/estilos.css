@@ -224,6 +224,117 @@ button{font:inherit;cursor:pointer}
   font-family:var(--serif);font-weight:700;font-size:clamp(14px,1.2vw,21px);
 }
 
+/* ---------- NOSOTROS: qué hacemos ---------- */
+.titulo-bloque{
+  font-family:var(--serif);font-weight:700;color:var(--ink);
+  font-size:clamp(22px,2.4vw,38px);margin:clamp(30px,4vw,56px) 0 clamp(6px,.8vw,10px);
+}
+.subtitulo-bloque{
+  font-family:var(--sans);color:var(--muted);font-weight:300;
+  font-size:clamp(14px,1.15vw,19px);margin:0 0 clamp(18px,2.2vw,30px);max-width:60ch;
+}
+.hace{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:clamp(14px,1.6vw,24px);
+}
+.hace-item{
+  background:#fff;border:1px solid #E6EEF5;border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:clamp(20px,2.2vw,30px) clamp(16px,1.8vw,24px);
+  text-align:center;
+}
+.hace-item .ico-circle{margin:0 auto clamp(12px,1.4vw,20px)}
+.hace-item h4{
+  margin:0 0 8px;font-family:var(--sans);font-weight:500;color:var(--ink);
+  font-size:clamp(15px,1.25vw,20px);line-height:1.3;
+}
+.hace-item p{
+  margin:0;font-family:var(--sans);font-weight:300;color:var(--muted);
+  font-size:clamp(12.5px,1vw,15px);line-height:1.55;
+}
+
+/* ---------- NOSOTROS: mapa de "Donde operamos" ---------- */
+.zonas-mapa{
+  display:grid;grid-template-columns:1fr 1.1fr;gap:clamp(20px,3vw,46px);
+  align-items:center;margin-top:clamp(20px,2.6vw,36px);
+}
+.mapa-card{
+  background:var(--navy);border-radius:var(--radius-lg);overflow:hidden;
+  box-shadow:var(--shadow);aspect-ratio:4/3;position:relative;
+}
+.mapa-card svg{width:100%;height:100%;display:block}
+
+/* ---------- INICIO: historia ---------- */
+.historia{
+  display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,3.4vw,54px);
+  align-items:center;margin-top:clamp(20px,2.6vw,36px);
+}
+.historia-texto p{
+  font-family:var(--serif);font-size:clamp(14px,1.1vw,18px);line-height:1.75;
+  color:#2C3B4A;margin:0 0 clamp(12px,1.4vw,20px);
+}
+.historia-arte{
+  background:var(--navy);border-radius:var(--radius-lg);box-shadow:var(--shadow);
+  aspect-ratio:4/3;position:relative;overflow:hidden;
+}
+.historia-arte svg{width:100%;height:100%;display:block}
+
+/* ---------- INICIO: por qué elegirnos ---------- */
+.porque{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:clamp(14px,1.8vw,26px);margin-top:clamp(18px,2.2vw,30px);
+}
+.porque-item{
+  display:flex;gap:clamp(14px,1.6vw,22px);align-items:flex-start;
+  background:#fff;border:1px solid #E6EEF5;border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:clamp(18px,2vw,26px);
+}
+.porque-item .ico-circle{flex:0 0 auto;width:clamp(52px,5vw,72px);height:clamp(52px,5vw,72px)}
+.porque-item h4{
+  margin:0 0 6px;font-family:var(--sans);font-weight:500;color:var(--ink);
+  font-size:clamp(15px,1.2vw,19px);
+}
+.porque-item p{
+  margin:0;font-family:var(--sans);font-weight:300;color:var(--muted);
+  font-size:clamp(12.5px,1vw,15px);line-height:1.55;
+}
+
+/* ---------- INICIO: colaboradores ---------- */
+.colaboradores{
+  margin-top:clamp(24px,3vw,44px);background:var(--navy);border-radius:var(--radius-lg);
+  padding:clamp(24px,3vw,44px) clamp(20px,3vw,50px);text-align:center;color:#fff;
+}
+.colaboradores .subtitulo-bloque{color:#B9C9D8;margin-left:auto;margin-right:auto}
+.colaboradores-logos{
+  display:flex;justify-content:center;place-items:center;text-align:center;margin-top:clamp(18px,2vw,28px);
+}
+.badge-eegsa{
+  display:inline-flex;align-items:center;gap:clamp(14px,1.6vw,22px);margin:0 auto;
+  background:rgba(255,255,255,.06);border:1.4px solid rgba(255,255,255,.25);
+  border-radius:16px;padding:clamp(16px,1.8vw,24px) clamp(26px,3vw,44px);
+}
+.badge-eegsa .ico-circle{background:rgba(255,255,255,.12);width:clamp(52px,5vw,70px);height:clamp(52px,5vw,70px)}
+.badge-eegsa .ico-circle svg{stroke:#fff;transform:translateY(15px)}
+.badge-eegsa .texto{text-align:left}
+.badge-eegsa strong{
+  display:block;font-family:var(--serif);font-weight:700;
+  font-size:clamp(18px,1.7vw,26px);letter-spacing:.03em;
+}
+.badge-eegsa span{
+  display:block;font-family:var(--sans);font-weight:300;color:#C4D3E1;
+  font-size:clamp(12px,1vw,15px);
+}
+
+/* ---------- pie de página (Inicio y Nosotros) ---------- */
+.pie-pagina{
+  margin-top:clamp(32px,4.4vw,64px);padding:clamp(22px,2.6vw,34px) 0 clamp(28px,3.2vw,42px);
+  border-top:1px solid #E1E9F1;
+  display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;
+}
+.pie-marca{display:flex;align-items:center;gap:10px}
+.pie-marca img{width:34px;height:auto}
+.pie-marca span{font-family:var(--serif);font-weight:700;color:var(--ink);letter-spacing:.02em}
+.pie-pagina p{margin:0;font-family:var(--sans);font-weight:300;color:var(--muted);font-size:clamp(12px,1vw,14px)}
+
 /* ---------- CONTACTO ---------- */
 #contacto .hero,#login .hero{min-height:calc(100vh - 96px);display:flex;align-items:center}
 #contacto .hero-photo{
@@ -288,6 +399,10 @@ button{font:inherit;cursor:pointer}
 }
 .field.error input,.field.error textarea{border-color:var(--red);box-shadow:0 0 0 3px rgba(227,69,63,.14)}
 .msg-error{color:var(--red);font-size:13px;min-height:0;display:none}
+.error-envio{
+  color:var(--red);background:#FDECEC;border:1px solid #F3C4C2;border-radius:10px;
+  padding:10px 14px;margin:12px 0 0;font-family:var(--sans);font-size:14px;text-align:center;
+}
 .field.error .msg-error{display:block}
 .btn-send{
   width:100%;display:inline-flex;align-items:center;justify-content:center;gap:14px;
@@ -569,6 +684,10 @@ button{font:inherit;cursor:pointer}
   #contacto .hero,#login .hero{min-height:0}
   .infobar{flex-direction:column;align-items:stretch;text-align:center}
   .infobar .place{justify-content:center}
+  .hace{grid-template-columns:repeat(2,1fr)}
+  .zonas-mapa{grid-template-columns:1fr}
+  .historia{grid-template-columns:1fr}
+  .porque{grid-template-columns:1fr}
 }
 @media (max-width:760px){
   .burger{display:block}
@@ -587,6 +706,9 @@ button{font:inherit;cursor:pointer}
   .zones .zt{border-right:0;padding-right:0}
   .zone-list{width:100%}
   .zone{flex:1;text-align:center}
+  .hace{grid-template-columns:1fr}
+  .badge-eegsa{flex-direction:column;text-align:center}
+  .badge-eegsa .texto{text-align:center}
   .circuit,.stats .deco,.timeline .deco{display:none}
   #contacto .hero-photo,#login .hero-photo,#inicio .hero-photo,#nosotros .hero-photo{
     left:0;right:0;transform:none;aspect-ratio:auto;width:100%;

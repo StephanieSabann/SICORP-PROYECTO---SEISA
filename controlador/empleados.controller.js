@@ -26,22 +26,36 @@ function validarTexto(valor, campo, maximo, obligatorio = true) {
     return texto || null;
 }
 
-function validarFecha(valor) {
+function validarFecha(valor, etiqueta = "") {
     if (valor === undefined || valor === null || valor === "") {
         return null;
     }
 
     if (typeof valor !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
-        throw new Error("La fecha de contratación debe tener el formato AAAA-MM-DD.");
+        throw new Error(`La fecha ${etiqueta} debe tener el formato AAAA-MM-DD.`.replace("  ", " "));
     }
 
     const fecha = new Date(`${valor}T00:00:00Z`);
 
     if (Number.isNaN(fecha.getTime()) || fecha.toISOString().slice(0, 10) !== valor) {
-        throw new Error("La fecha de contratación no es válida.");
+        throw new Error(`La fecha ${etiqueta} no es válida.`.replace("  ", " "));
     }
 
     return valor;
+}
+
+function validarNit(valor) {
+    if (valor === undefined || valor === null || valor === "") {
+        return null;
+    }
+
+    const numero = Number(valor);
+
+    if (!Number.isInteger(numero) || numero < 0) {
+        throw new Error("El NIT debe ser un número entero (sin guiones ni letras).");
+    }
+
+    return numero;
 }
 
 function validarActivo(valor) {
@@ -120,10 +134,12 @@ async function crear(req, res) {
             nombre,
             apellido,
             dpi,
+            nit,
             direccion,
             telefono,
             email,
             fecha_contratacion,
+            fecha_nacimiento,
             activo
         } = req.body;
 
@@ -133,7 +149,7 @@ async function crear(req, res) {
             throw new Error("El id_puesto debe ser un número entero positivo.");
         }
 
-        const emailLimpio = validarTexto(email, "El email", 32);
+        const emailLimpio = validarTexto(email, "El email", 60);
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLimpio)) {
             throw new Error("El email no es válido.");
@@ -141,13 +157,15 @@ async function crear(req, res) {
 
         const empleadoCreado = await model.crear({
             id_puesto: idPuesto,
-            nombre: validarTexto(nombre, "El nombre", 16),
-            apellido: validarTexto(apellido, "El apellido", 16),
+            nombre: validarTexto(nombre, "El nombre", 50),
+            apellido: validarTexto(apellido, "El apellido", 50),
             dpi: validarTexto(dpi, "El DPI", 13),
-            direccion: validarTexto(direccion, "La dirección", 24, false),
-            telefono: validarTexto(telefono, "El teléfono", 16, false),
+            nit: validarNit(nit),
+            direccion: validarTexto(direccion, "La dirección", 100, false),
+            telefono: validarTexto(telefono, "El teléfono", 20, false),
             email: emailLimpio,
-            fecha_contratacion: validarFecha(fecha_contratacion),
+            fecha_contratacion: validarFecha(fecha_contratacion, "de contratación"),
+            fecha_nacimiento: validarFecha(fecha_nacimiento, "de nacimiento"),
             activo: validarActivo(activo)
         });
 
@@ -183,10 +201,12 @@ async function actualizar(req, res) {
             "nombre",
             "apellido",
             "dpi",
+            "nit",
             "direccion",
             "telefono",
             "email",
             "fecha_contratacion",
+            "fecha_nacimiento",
             "activo"
         ];
 
@@ -210,17 +230,19 @@ async function actualizar(req, res) {
 
                 datos.id_puesto = idPuesto;
             } else if (campo === "nombre") {
-                datos.nombre = validarTexto(req.body.nombre, "El nombre", 16);
+                datos.nombre = validarTexto(req.body.nombre, "El nombre", 50);
             } else if (campo === "apellido") {
-                datos.apellido = validarTexto(req.body.apellido, "El apellido", 16);
+                datos.apellido = validarTexto(req.body.apellido, "El apellido", 50);
             } else if (campo === "dpi") {
                 datos.dpi = validarTexto(req.body.dpi, "El DPI", 13);
+            } else if (campo === "nit") {
+                datos.nit = validarNit(req.body.nit);
             } else if (campo === "direccion") {
-                datos.direccion = validarTexto(req.body.direccion, "La dirección", 24, false);
+                datos.direccion = validarTexto(req.body.direccion, "La dirección", 100, false);
             } else if (campo === "telefono") {
-                datos.telefono = validarTexto(req.body.telefono, "El teléfono", 16, false);
+                datos.telefono = validarTexto(req.body.telefono, "El teléfono", 20, false);
             } else if (campo === "email") {
-                const email = validarTexto(req.body.email, "El email", 32);
+                const email = validarTexto(req.body.email, "El email", 60);
 
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                     throw new Error("El email no es válido.");
@@ -228,7 +250,9 @@ async function actualizar(req, res) {
 
                 datos.email = email;
             } else if (campo === "fecha_contratacion") {
-                datos.fecha_contratacion = validarFecha(req.body.fecha_contratacion);
+                datos.fecha_contratacion = validarFecha(req.body.fecha_contratacion, "de contratación");
+            } else if (campo === "fecha_nacimiento") {
+                datos.fecha_nacimiento = validarFecha(req.body.fecha_nacimiento, "de nacimiento");
             } else if (campo === "activo") {
                 datos.activo = validarActivo(req.body.activo);
             }

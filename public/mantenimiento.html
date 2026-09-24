@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Soporte y Mantenimiento — SICORP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/panel.css">
+  <script>document.documentElement.classList.add('js-anim');</script>
+</head>
+
+<body data-pagina="Mantenimiento">
+
+  <div class="app">
+
+
+    <!-- ==================== BARRA LATERAL ==================== -->
+    <aside class="sidebar">
+      <div class="marca">
+        <!-- IMAGEN 1: el logo de SEISA -->
+        <img src="img/logo.png" alt="SEISA">
+        <span class="sistema">SICORP—SEISA</span>
+      </div>
+
+      <nav class="menu">
+        <button class="menu-item" data-modulo="Empleados">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm7.5 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM9 12.8c-3 0-6 1.5-6 4.2V20h12v-3c0-2.7-3-4.2-6-4.2zm7.8.2c-.7 0-1.4.1-2 .3 1.3 1 2.2 2.3 2.2 3.9V20h4v-2.7c0-2.5-2.4-4.3-4.2-4.3z" />
+          </svg>
+          <span>Empleados</span>
+        </button>
+        <button class="menu-item" data-modulo="Inventario">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path
+              d="M14.7 6.3a3.6 3.6 0 0 1-4.7 4.7L4.5 16.5a1.7 1.7 0 0 0 2.4 2.4L12.4 13a3.6 3.6 0 0 1 4.7-4.7l-2.4-2z" />
+            <path d="M9.2 4.4L7.4 3l-2 .6-.6 2 1.4 1.8" />
+            <path d="M19.6 14.8l1.8 1.8-.6 2-2 .6-1.8-1.4" />
+          </svg>
+          <span>Inventario</span>
+        </button>
+        <button class="menu-item" data-modulo="Nóminas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round">
+            <rect x="4" y="3" width="13" height="18" rx="2" />
+            <path d="M17 7h3v11a3 3 0 0 1-3 3" />
+            <path d="M8 8h5M8 12h5M8 16h3" stroke-linecap="round" />
+          </svg>
+          <span>Nóminas</span>
+        </button>
+        <button class="menu-item" data-modulo="Reportes">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <rect x="3" y="13" width="4" height="8" rx="1" />
+            <rect x="10" y="8" width="4" height="13" rx="1" />
+            <rect x="17" y="3" width="4" height="18" rx="1" />
+          </svg>
+          <span>Reportes</span>
+        </button>
+        <button class="menu-item" data-modulo="Usuarios">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="9" cy="8.5" r="3.4" />
+            <path d="M2.6 20c.8-3.4 3.4-5.3 6.4-5.3s5.6 1.9 6.4 5.3" />
+            <path d="M16.3 5.4a3.3 3.3 0 0 1 0 6.4M17.8 15c2 .8 3.3 2.5 3.6 5" />
+          </svg>
+          <span>Usuarios</span>
+        </button>
+      </nav>
+
+      <svg class="deco" viewBox="0 0 300 260" fill="none" aria-hidden="true">
+        <path d="M0 40h60l26-26h120" stroke="#8C99A6" stroke-width="2.4" opacity=".55" />
+        <path d="M0 78h74l26-26h150" stroke="#E3453F" stroke-width="2.4" />
+        <path d="M0 118h84l26-26h140" stroke="#E3453F" stroke-width="2.4" opacity=".85" />
+        <path d="M0 168h96l30 30h130" stroke="#2FA8DE" stroke-width="2.4" />
+        <path d="M0 208h110l30 30h120" stroke="#2FA8DE" stroke-width="2.4" opacity=".75" />
+        <path d="M0 240h124l26 26h110" stroke="#8C99A6" stroke-width="2.4" opacity=".45" />
+        <circle cx="206" cy="14" r="5" fill="#E3453F" />
+        <circle cx="250" cy="52" r="5" fill="#E3453F" />
+        <circle cx="256" cy="198" r="5" fill="#2FA8DE" />
+        <circle cx="260" cy="266" r="5" fill="#2FA8DE" />
+      </svg>
+    </aside>
+
+    <!-- ==================== ZONA DERECHA ==================== -->
+    <div class="lado">
+
+      <header class="topbar">
+        <div class="cuenta">
+          <span class="divisor"></span>
+          <svg class="avatar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <circle cx="12" cy="12" r="9.2" />
+            <circle cx="12" cy="10" r="3" />
+            <path d="M6.2 19a6 6 0 0 1 11.6 0" />
+          </svg>
+          <div class="quien">
+            <strong id="nombreUsuario">Jonathan</strong>
+            <small id="rolUsuario">Administrador</small>
+          </div>
+          <button class="chevron" id="btnCuenta" aria-expanded="false" aria-controls="menuCuenta"
+            aria-label="Abrir menú de la cuenta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M5 9l7 7 7-7" />
+            </svg>
+          </button>
+
+          <div class="menu-cuenta" id="menuCuenta" role="menu">
+            <button role="menuitem" data-ir="inicio">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+                <path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" />
+                <path d="M9.5 21v-6h5v6" />
+              </svg>
+              Inicio
+            </button>
+            <button role="menuitem" data-ir="cuenta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <circle cx="12" cy="8.5" r="3.6" />
+                <path d="M4.8 20c.9-3.7 3.8-5.7 7.2-5.7s6.3 2 7.2 5.7" />
+              </svg>
+              Cuenta
+            </button>
+            <button role="menuitem" id="btnSalir">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" />
+                <path d="M10 8l4 4-4 4M14 12H3.5" />
+              </svg>
+              Salir
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="contenido">
+        <p class="migas"><button data-ir="inicio">Inicio</button> / <span class="actual">Soporte y Mantenimiento</span></p>
+        <h1>Soporte y Mantenimiento</h1>
+        <p class="sub">Configura roles, permisos, catálogos y revisa los mensajes que llegan desde la landing page.</p>
+
+        <!-- ---------- Barra horizontal de pestañas ---------- -->
+        <div class="tabs-mant" role="tablist">
+          <button class="tab-mant is-on" data-tab="usuarios" role="tab" aria-selected="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8.5" r="3.4"/><path d="M2.6 20c.8-3.4 3.4-5.3 6.4-5.3s5.6 1.9 6.4 5.3"/><path d="M16.3 5.4a3.3 3.3 0 0 1 0 6.4M17.8 15c2 .8 3.3 2.5 3.6 5"/></svg>
+            Usuarios
+          </button>
+          <button class="tab-mant" data-tab="empleados" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm7.5 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM9 12.8c-3 0-6 1.5-6 4.2V20h12v-3c0-2.7-3-4.2-6-4.2zm7.8.2c-.7 0-1.4.1-2 .3 1.3 1 2.2 2.3 2.2 3.9V20h4v-2.7c0-2.5-2.4-4.3-4.2-4.3z"/></svg>
+            Empleados
+          </button>
+          <button class="tab-mant" data-tab="inventario" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5a4.5 4.5 0 0 0 5.9 5.9L21 9l-9.5 9.5a3 3 0 1 1-4.2-4.2L16 6l-1.5-2.5z"/><path d="M6.5 17.5h.01"/></svg>
+            Inventario
+          </button>
+          <button class="tab-mant" data-tab="nomina" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="4" y="3" width="13" height="18" rx="2"/><path d="M17 7h3v11a3 3 0 0 1-3 3"/><path d="M8 8h5M8 12h5M8 16h3" stroke-linecap="round"/></svg>
+            Nómina
+          </button>
+          <button class="tab-mant" data-tab="reportes" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="13" width="4" height="8" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>
+            Reportes
+          </button>
+          <button class="tab-mant" data-tab="soporte" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M3 7l9 6 9-6"/></svg>
+            Soporte
+            <span class="burbuja" id="burbujaMensajes" hidden>0</span>
+          </button>
+        </div>
+
+        <!-- ---------- USUARIOS: nuevo rol / nuevo permiso ---------- -->
+        <section class="panel-mant is-active" id="panel-usuarios">
+          <div class="rejilla-mant">
+            <form class="tarjeta" id="formNuevoPermiso">
+              <h2 class="cabecera">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2.4"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                Nuevo permiso
+              </h2>
+              <p class="nota" style="margin:0 0 14px">
+                Un permiso es un módulo completo del sistema (Empleados,
+                Inventario...). Se crean pocas veces — normalmente solo
+                cuando se agrega un módulo nuevo al sistema — y después
+                se reutilizan marcándolos en el checklist de "Nuevo rol",
+                a la derecha.
+              </p>
+              <label class="campo">
+                <span>Nombre del permiso</span>
+                <input type="text" id="permisoNombre" placeholder="Ej. Inventario" maxlength="50">
+                <em class="error">Escribe el nombre del permiso.</em>
+              </label>
+              <label class="campo">
+                <span>Descripción (opcional)</span>
+                <textarea id="permisoDescripcion" placeholder="Qué puede hacer alguien con este permiso..." maxlength="150" rows="2"></textarea>
+                <small class="contador" id="contadorPermisoDesc"></small>
+              </label>
+              <button type="submit" class="btn-rojo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Crear permiso
+              </button>
+              <div class="lista-mant" id="listaPermisosMant"></div>
+            </form>
+
+            <form class="tarjeta" id="formNuevoRol">
+              <h2 class="cabecera">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.4-3 8.2-7.5 9.5-4.5-1.3-7.5-5.1-7.5-9.5V6z"/><circle cx="12" cy="11" r="2.2"/></svg>
+                Nuevo rol
+              </h2>
+              <label class="campo">
+                <span>Nombre del rol</span>
+                <input type="text" id="rolNombre" placeholder="Ej. Supervisor de campo" maxlength="100">
+                <em class="error">Escribe el nombre del rol.</em>
+              </label>
+              <label class="campo">
+                <span>Descripción (opcional)</span>
+                <textarea id="rolDescripcion" placeholder="Para qué sirve este rol..." rows="2"></textarea>
+              </label>
+              <label class="campo">
+                <span>Permisos que va a tener este rol</span>
+              </label>
+              <div class="checklist-permisos" id="checklistPermisosNuevoRol">
+                <p class="vacio-mini">Cargando permisos disponibles…</p>
+              </div>
+              <p class="nota" style="margin:10px 0 0">
+                Puedes dejarlos todos sin marcar y asignárselos después
+                con "Editar accesos" en la lista de abajo.
+              </p>
+              <button type="submit" class="btn-rojo" style="margin-top:14px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Crear rol
+              </button>
+            </form>
+          </div>
+
+          <!-- ---------- Roles existentes: qué permisos tiene cada uno ---------- -->
+          <div class="tarjeta" style="margin-top:22px">
+            <h2 class="cabecera">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.4-3 8.2-7.5 9.5-4.5-1.3-7.5-5.1-7.5-9.5V6z"/><circle cx="12" cy="11" r="2.2"/></svg>
+              Roles y sus permisos
+            </h2>
+            <div class="tabla tabla-roles">
+              <div class="fila encabezado">
+                <span>Rol</span>
+                <span>Permisos asignados</span>
+                <span class="der">Acciones</span>
+              </div>
+              <div id="listaRolesMant"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- EMPLEADOS: nuevo puesto / nueva unidad ---------- -->
+        <section class="panel-mant" id="panel-empleados">
+          <div class="rejilla-mant">
+            <form class="tarjeta" id="formNuevoPuesto">
+              <h2 class="cabecera">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="1.6"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                Nuevo puesto
+              </h2>
+              <label class="campo">
+                <span>Nombre del puesto</span>
+                <input type="text" id="puestoNombre" placeholder="Ej. Supervisor" maxlength="24">
+                <em class="error">Escribe el nombre del puesto (máximo 24 caracteres).</em>
+              </label>
+              <label class="campo">
+                <span>Descripción (opcional)</span>
+                <textarea id="puestoDescripcion" placeholder="Para qué sirve este puesto..." maxlength="64" rows="2"></textarea>
+                <small class="contador" id="contadorPuestoDesc"></small>
+              </label>
+              <button type="submit" class="btn-rojo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Crear puesto
+              </button>
+              <div class="lista-mant" id="listaPuestosMant"></div>
+            </form>
+
+            <form class="tarjeta" id="formNuevaUnidad">
+              <h2 class="cabecera">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5a4.5 4.5 0 0 0 5.9 5.9L21 9l-9.5 9.5a3 3 0 1 1-4.2-4.2L16 6l-1.5-2.5z"/><path d="M6.5 17.5h.01"/></svg>
+                Nueva unidad
+              </h2>
+              <label class="campo">
+                <span>Código</span>
+                <input type="text" id="unidadCodigo" placeholder="Ej. S1" maxlength="10" style="text-transform:uppercase">
+                <em class="error">Escribe un código para la unidad.</em>
+              </label>
+              <label class="campo">
+                <span>📅 Fecha</span>
+                <input type="date" id="unidadFecha">
+              </label>
+              <label class="campo">
+                <span>Empleado asignado (opcional)</span>
+                <select id="unidadEmpleado">
+                  <option value="">Sin asignar todavía</option>
+                </select>
+              </label>
+              <button type="submit" class="btn-rojo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Crear unidad
+              </button>
+            </form>
+          </div>
+
+          <div class="tarjeta" style="margin-top:22px">
+            <h2 class="cabecera">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5a4.5 4.5 0 0 0 5.9 5.9L21 9l-9.5 9.5a3 3 0 1 1-4.2-4.2L16 6l-1.5-2.5z"/><path d="M6.5 17.5h.01"/></svg>
+              Unidades existentes
+            </h2>
+            <div class="tabla tabla-unidades">
+              <div class="fila encabezado">
+                <span>Código</span>
+                <span>📅 Fecha</span>
+                <span>Empleado asignado</span>
+                <span>Estado</span>
+                <span class="der">Acciones</span>
+              </div>
+              <div id="listaUnidadesMant"></div>
+              <p class="vacio-mini" id="sinUnidades" hidden>Todavía no hay unidades creadas.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- EN CONSTRUCCIÓN ---------- -->
+        <section class="panel-mant" id="panel-inventario">
+          <div class="tarjeta pendiente-mant">
+            <h2 class="cabecera">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 8v.01M12 11.5v4.5"/></svg>
+              Mantenimiento de Inventario
+            </h2>
+            <p class="nota" style="margin:0">Esta pestaña está lista para cuando se termine el módulo de Inventario.</p>
+          </div>
+        </section>
+        <section class="panel-mant" id="panel-nomina">
+          <div class="tarjeta pendiente-mant">
+            <h2 class="cabecera">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 8v.01M12 11.5v4.5"/></svg>
+              Mantenimiento de Nómina
+            </h2>
+            <p class="nota" style="margin:0">Esta pestaña está lista para cuando se termine el módulo de Nóminas.</p>
+          </div>
+        </section>
+        <section class="panel-mant" id="panel-reportes">
+          <div class="tarjeta pendiente-mant">
+            <h2 class="cabecera">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 8v.01M12 11.5v4.5"/></svg>
+              Mantenimiento de Reportes
+            </h2>
+            <p class="nota" style="margin:0">Esta pestaña está lista para cuando se termine el módulo de Reportes.</p>
+          </div>
+        </section>
+
+        <!-- ---------- SOPORTE: mensajes de la landing ---------- -->
+        <section class="panel-mant" id="panel-soporte">
+          <section class="tarjeta">
+            <h2 class="cabecera">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M3 7l9 6 9-6"/></svg>
+              Mensajes recibidos
+              <label class="chip-archivados">
+                <input type="checkbox" id="verArchivados">
+                Ver archivados
+              </label>
+            </h2>
+            <p class="nota" style="margin:0 0 16px" id="avisoTablaMensajes">
+              Esto todavía no va a mostrar nada: falta crear la tabla
+              "Mensaje" en la base de datos y conectar el formulario de
+              contacto de la landing para que guarde ahí. En cuanto
+              exista la tabla, esta lista funciona sola.
+            </p>
+            <div class="tabla tabla-mensajes" id="tablaMensajes">
+              <div class="fila encabezado">
+                <span>De</span>
+                <span>Asunto</span>
+                <span>Fecha</span>
+                <span>Estado</span>
+                <span class="der">Acciones</span>
+              </div>
+              <div id="listaMensajes"></div>
+              <p class="vacio" id="sinMensajes" hidden>No hay mensajes todavía.</p>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: DETALLE DE MENSAJE ==================== -->
+  <div class="fondo-modal" id="modalMensaje" role="dialog" aria-modal="true" aria-labelledby="tituloMensaje">
+    <div class="modal">
+
+      <!-- ---------- Vista 1: ficha del mensaje (la que se ve primero) ---------- -->
+      <div id="vistaDetalleMensaje">
+        <h3 id="tituloMensaje">Mensaje</h3>
+        <div class="detalle-mensaje" id="detalleMensaje"></div>
+        <div class="acciones-modal acciones-modal-mensaje">
+          <button class="btn-linea" id="btnCerrarMensaje">Cerrar</button>
+          <button class="btn-linea" id="btnArchivarMensaje">Archivar</button>
+          <button class="btn-linea" id="btnIrAChat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17l-6-5 6-5"/><path d="M3 12h11a6 6 0 0 1 6 6v1"/></svg>
+            Responder
+          </button>
+          <button class="btn-rojo" id="btnEliminarMensaje">Eliminar</button>
+        </div>
+      </div>
+
+      <!-- ---------- Vista 2: el chat (solo aparece al darle "Responder") ---------- -->
+      <div id="vistaChatMensaje" class="modal-chat" hidden>
+        <div class="cabecera-chat">
+          <div>
+            <h3 id="tituloChatMensaje">Mensaje</h3>
+            <p class="sub-chat" id="subMensaje"></p>
+          </div>
+          <div class="acciones-cabecera-chat">
+            <button type="button" class="icono-btn" id="btnVolverDetalle" aria-label="Volver">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button type="button" class="icono-btn" id="btnCerrarChat" aria-label="Cerrar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="hilo-chat" id="hiloChat"></div>
+
+        <form id="formResponderChat" class="caja-responder-chat">
+          <textarea id="textoRespuestaChat" placeholder="Escribe tu respuesta..." maxlength="1000" rows="2"></textarea>
+          <button type="submit" class="btn-rojo" aria-label="Enviar respuesta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M21.5 2.5L2.5 10l7.5 3 3 7.5 8.5-18z"/></svg>
+          </button>
+        </form>
+        <small class="contador" id="contadorRespuestaChat" style="display:block;text-align:right;margin-top:4px"></small>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: EDITAR ACCESOS DE UN ROL ==================== -->
+  <div class="fondo-modal" id="modalAccesos" role="dialog" aria-modal="true" aria-labelledby="tituloAccesos">
+    <div class="modal">
+      <h3 id="tituloAccesos">Editar accesos</h3>
+      <p class="nota" style="text-align:left;margin:0 0 16px" id="subAccesos"></p>
+      <div class="checklist-permisos" id="checklistPermisosEditar" style="text-align:left"></div>
+      <div class="acciones-modal" style="margin-top:20px">
+        <button class="btn-linea" id="btnCancelarAccesos">Cancelar</button>
+        <button class="btn-rojo" id="btnGuardarAccesos">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CONFIRMAR ==================== -->
+  <div class="fondo-modal" id="modalConfirmar" role="dialog" aria-modal="true" aria-labelledby="tituloConfirmar">
+    <div class="modal">
+      <svg class="visto alerta" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <circle cx="60" cy="60" r="46" stroke="#E3453F" stroke-width="6" />
+        <path d="M60 36v34" stroke="#E3453F" stroke-width="8" stroke-linecap="round" />
+        <circle cx="60" cy="84" r="5" fill="#E3453F" />
+      </svg>
+      <h3 id="tituloConfirmar">¿Confirmar?</h3>
+      <p id="textoConfirmar">Esta acción no se puede deshacer.</p>
+      <div class="acciones-modal">
+        <button class="btn-linea" id="btnNo">Cancelar</button>
+        <button class="btn-rojo" id="btnSi">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="aviso" id="aviso" role="status"></div>
+  <script src="js/comun.js"></script>
+  <script src="js/mantenimiento.js"></script>
+</body>
+
+</html>
