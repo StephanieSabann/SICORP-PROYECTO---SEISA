@@ -202,9 +202,11 @@
 
             <select id="filtroTipo" aria-label="Filtrar por tipo">
               <option value="">Tipo de empleado</option>
-              <option value="Técnico">Técnico</option>
-              <option value="Auxiliar">Auxiliar</option>
-              <option value="Administrativo">Administrativo</option>
+              <option value="TECNICO_SOCIO">Técnico socio</option>
+              <option value="TECNICO_NO_SOCIO">Técnico no socio</option>
+              <option value="SIN_CLASIFICAR">Técnico sin clasificar</option>
+              <option value="AUXILIAR">Auxiliar</option>
+              <option value="ADMINISTRATIVO">Administrativo</option>
             </select>
 
             <select id="filtroUnidad" aria-label="Filtrar por unidad">
@@ -319,20 +321,25 @@
               <label class="campo">
                 <span>Tipo de empleado <i class="obligatorio">*</i></span>
               </label>
-              <div class="segmentado" id="segmentadoTipo">
-                <button type="button" data-tipo="Técnico" class="is-on">
+              <div class="segmentado segmentado-4" id="segmentadoTipo">
+                <button type="button" data-tipo="TECNICO_SOCIO" class="is-on">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M4.8 20c.8-3.6 3.7-5.6 7.2-5.6s6.4 2 7.2 5.6"/></svg>
-                  Técnico
+                  Técnico socio
                 </button>
-                <button type="button" data-tipo="Auxiliar">
+                <button type="button" data-tipo="TECNICO_NO_SOCIO">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M4.8 20c.8-3.6 3.7-5.6 7.2-5.6s6.4 2 7.2 5.6"/></svg>
+                  Técnico no socio
+                </button>
+                <button type="button" data-tipo="AUXILIAR">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M4.8 20c.8-3.6 3.7-5.6 7.2-5.6s6.4 2 7.2 5.6"/></svg>
                   Auxiliar
                 </button>
-                <button type="button" data-tipo="Administrativo">
+                <button type="button" data-tipo="ADMINISTRATIVO">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="1.6"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
                   Administrativo
                 </button>
               </div>
+              <em class="error-tipo" id="errorTipo" hidden>Escoge si el técnico es socio o no socio.</em>
 
               <label class="campo">
                 <span>Puesto <i class="obligatorio">*</i></span>
@@ -417,9 +424,11 @@
                 <div>
                   <span class="punto" id="expPunto"></span>
                   <select id="expTipo" disabled aria-label="Tipo de empleado">
-                    <option>Técnico</option>
-                    <option>Auxiliar</option>
-                    <option>Administrativo</option>
+                    <option value="" disabled>Técnico sin clasificar</option>
+                    <option value="TECNICO_SOCIO">Técnico socio</option>
+                    <option value="TECNICO_NO_SOCIO">Técnico no socio</option>
+                    <option value="AUXILIAR">Auxiliar</option>
+                    <option value="ADMINISTRATIVO">Administrativo</option>
                   </select>
                 </div>
                 <div>

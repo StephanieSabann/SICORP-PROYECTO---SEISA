@@ -302,3 +302,28 @@ const obsConteo = new IntersectionObserver(entradas => {
 document.querySelectorAll('.stats').forEach(s => obsConteo.observe(s));
 
 window.__revelar = reiniciarRevelado;
+
+
+/* Ojo del login: muestra u oculta la contraseña para revisar que se
+   está escribiendo bien. Se vuelve a ocultar al enviar el formulario. */
+(function () {
+  const boton = document.getElementById('verPass');
+  const campo = document.getElementById('loginPass');
+  if (!boton || !campo) return;
+  function mostrar(visible) {
+    campo.type = visible ? 'text' : 'password';
+    boton.classList.toggle('visible', visible);
+    boton.setAttribute('aria-pressed', String(visible));
+    boton.setAttribute('aria-label', visible ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    boton.title = visible ? 'Ocultar contraseña' : 'Mostrar contraseña';
+  }
+  boton.addEventListener('mousedown', e => e.preventDefault());   // no le quita el foco al campo
+  boton.addEventListener('click', () => {
+    const pos = campo.selectionStart;
+    mostrar(campo.type === 'password');
+    campo.focus();
+    try { campo.setSelectionRange(pos, pos); } catch (_) {}
+  });
+  const form = campo.closest('form');
+  if (form) form.addEventListener('submit', () => mostrar(false));
+})();

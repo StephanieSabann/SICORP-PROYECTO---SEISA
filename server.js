@@ -8,6 +8,11 @@ const PORT = 3000;
 
 //importa la conexion desde basededatos > conexion.js
 const { sql, obtenerPool } = require("./basededatos/conexion");
+// Crea solas las tablas de Inventario (categorías, recursos, movimientos,
+// conteos) si todavía no existen en la base de datos.
+const { prepararEsquemaInventario, esquemaInventarioListo } = require("./basededatos/esquemaInventario");
+// Lo mismo para Nóminas (Nomina_proceso, comprobantes, historial...).
+const { prepararEsquemaNominas, esquemaNominasListo } = require("./basededatos/esquemaNominas");
 
 app.use(express.json()); //Permite recibir JSON desde fetch()
 
@@ -115,15 +120,69 @@ const puestosRoutes = require("./rutas/puestos.routes");
 const unidadesRoutes = require("./rutas/unidades.routes");
 const permisosRoutes = require("./rutas/permisos.routes");
 const mensajesRoutes = require("./rutas/mensajes.routes");
+const recursosRoutes = require("./rutas/recursos.routes");
+const movimientosInventarioRoutes = require("./rutas/movimientosInventario.routes");
+const conteosInventarioRoutes = require("./rutas/conteosInventario.routes");
 
 app.use('/api/credenciales', requiereLoginAPI, requiereAcceso('Usuarios'), credencialesRoutes);
-app.use("/api/empleados", requiereLoginAPI, requiereAcceso('Empleados'), empleadosRoutes);
+app.use("/api/empleados", requiereLoginAPI, requiereAcceso('Empleados'), esquemaNominasListo, empleadosRoutes);
 app.use("/api/roles", requiereLoginAPI, requiereAcceso('Usuarios'), rolesRoutes);
 app.use("/api/accesos", requiereLoginAPI, requiereAcceso('Usuarios'), accesosRoutes);
 app.use("/api/usuarios", requiereLoginAPI, requiereAcceso('Usuarios'), usuariosRoutes);
 app.use("/api/puestos", requiereLoginAPI, requiereAcceso('Empleados'), puestosRoutes);
 app.use("/api/unidades", requiereLoginAPI, requiereAcceso('Empleados'), unidadesRoutes);
 app.use("/api/permisos", requiereLoginAPI, requiereAcceso('Empleados'), permisosRoutes);
+
+/* Módulo de Inventario: Recursos (catálogo), Movimientos (entrada,
+   entrega, devolución e historial) y Conteos (reconciliación física).
+   Los tres comparten el acceso "Inventario", que ya existe en
+   Catalogo_acceso junto con Empleados/Usuarios/Nóminas/Reportes. */
+app.use("/api/inventario/recursos", requiereLoginAPI, requiereAcceso('Inventario'), esquemaInventarioListo, recursosRoutes);
+app.use("/api/inventario/movimientos", requiereLoginAPI, requiereAcceso('Inventario'), esquemaInventarioListo, movimientosInventarioRoutes);
+app.use("/api/inventario/conteos", requiereLoginAPI, requiereAcceso('Inventario'), esquemaInventarioListo, conteosInventarioRoutes);
+
+/* Módulo de Nóminas. El acceso puede llamarse "Nóminas" o "Nominas"
+   en Catalogo_acceso (se aceptan ambos). Toda la lógica está en
+   servicios/nominas.servicio.js; aquí solo se conecta con SQL Server. */
+const { crearMiddlewareAccesoNominas } = require("./utilidades/accesoNominas");
+const requiereAccesoNominas = crearMiddlewareAccesoNominas(async req => {
+    const pool = await obtenerPool();
+    const r = await pool.request()
+        .input("id_credencial", sql.Int, req.session.id_credencial)
+        .query(`
+            SELECT ca.nombre
+            FROM Rol_credencial rc
+            INNER JOIN Rol_acceso ra ON ra.id_rol = rc.id_rol
+            INNER JOIN Catalogo_acceso ca ON ca.id_acceso = ra.id_acceso
+            WHERE rc.id_credencial = @id_credencial
+        `);
+    return r.recordset.map(f => f.nombre);
+});
+
+/* Nombre completo de quien hace cada acción (para el historial y
+   "Importado por" / "Aprobado por"). Se busca una vez y se guarda en la sesión. */
+async function usuarioDeSesion(req) {
+    if (!req.session.nombreCompleto) {
+        try {
+            const pool = await obtenerPool();
+            const r = await pool.request().input("id", sql.Int, req.session.id_credencial).query(`
+                SELECT e.nombre, e.apellido FROM credenciales c
+                INNER JOIN Empleado e ON e.codigo_empleado = c.codigo_empleado
+                WHERE c.id_credencial = @id`);
+            const f = r.recordset[0];
+            req.session.nombreCompleto = f ? `${f.nombre} ${f.apellido}`.trim() : req.session.usuario;
+        } catch (_) {
+            return { id_credencial: req.session.id_credencial, nombre: req.session.usuario };
+        }
+    }
+    return { id_credencial: req.session.id_credencial, nombre: req.session.nombreCompleto };
+}
+
+const { crearServicioNominas } = require("./servicios/nominas.servicio");
+const { crearRutasNominas } = require("./rutas/nominas.routes");
+const { crearAlmacen } = require("./utilidades/almacenNominas");
+const servicioNominas = crearServicioNominas({ repo: require("./modelos/nominas.model"), almacen: crearAlmacen() });
+app.use("/api/nominas", requiereLoginAPI, requiereAccesoNominas, esquemaNominasListo, crearRutasNominas(servicioNominas, usuarioDeSesion));
 
 /* /api/mensajes es especial: el formulario de contacto de la landing
    lo usa SIN haber iniciado sesión (POST, para guardar un mensaje
@@ -210,7 +269,9 @@ const PAGINAS_PROTEGIDAS = [
     "/inicio.html",
     "/empleados.html",
     "/usuarios.html",
-    "/mantenimiento.html"
+    "/mantenimiento.html",
+    "/inventario.html",
+    "/nominas.html"
 ];
 
 app.use((req, res, next) => {
@@ -351,5 +412,10 @@ function obtenerIPV4() {
 app.listen(PORT, "0.0.0.0", async () => { //0.0.0.0 significa que esta escuchando todas las direcciones
     const ip = obtenerIPV4();
     console.log(`Servidor ejecutándose en http://${ip}:${PORT}`);
+
+    // Prepara las tablas de Inventario apenas arranca (si falla aquí,
+    // se vuelve a intentar sola en la primera petición a /api/inventario).
+    prepararEsquemaInventario().catch(() => {});
+    prepararEsquemaNominas().catch(() => {});
 
 });

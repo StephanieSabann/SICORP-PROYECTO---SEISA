@@ -851,6 +851,11 @@ input[type="date"][readonly]::-webkit-calendar-picker-indicator{
 .segmentado button + button{border-left:1px solid var(--linea)}
 .segmentado button svg{width:16px;height:16px}
 .segmentado button.is-on{background:var(--rojo);color:#fff}
+.segmentado.segmentado-4{grid-template-columns:repeat(4,1fr);margin-bottom:8px}
+.segmentado.segmentado-4 button{font-size:12.5px;padding-left:6px;padding-right:6px;text-align:center;line-height:1.2}
+@media (max-width:640px){.segmentado.segmentado-4{grid-template-columns:repeat(2,1fr)}.segmentado.segmentado-4 button:nth-child(3){border-left:0}.segmentado.segmentado-4 button:nth-child(n+3){border-top:1px solid var(--linea)}}
+.error-tipo{display:block;color:var(--rojo-vivo,#e3453f);font-size:12px;font-style:normal;margin-top:6px}
+.error-tipo[hidden]{display:none}
 .aviso-form{
   display:flex;align-items:center;gap:12px;margin-top:clamp(12px,1.4vw,22px);
   border:1px solid rgba(63,182,232,.35);border-radius:10px;padding:clamp(10px,1.1vw,16px) clamp(12px,1.4vw,22px);
@@ -1007,3 +1012,200 @@ input[type="date"][readonly]::-webkit-calendar-picker-indicator{
 }
 .caja-responder-chat button{width:44px;height:44px;padding:0;border-radius:50%;flex:0 0 auto;display:grid;place-items:center}
 .caja-responder-chat button svg{width:19px;height:19px}
+
+/* ============================================================
+   INVENTARIO
+   ============================================================ */
+
+/* ---------- panel de cifras (Resumen) ---------- */
+.panel-inv{
+  position:relative;margin:clamp(14px,1.8vw,26px) 0;
+  border:1px solid rgba(63,182,232,.35);border-radius:18px;
+  background:linear-gradient(120deg,rgba(179,49,47,.12),rgba(6,25,46,.5) 45%,rgba(15,92,150,.18));
+  padding:clamp(16px,2vw,32px) clamp(18px,2.4vw,40px);
+  display:flex;align-items:center;gap:clamp(20px,3.6vw,60px);flex-wrap:wrap;
+  box-shadow:inset 0 0 40px rgba(227,69,63,.08),0 18px 40px rgba(0,0,0,.35);
+}
+.icono-cifra{
+  display:inline-grid;place-items:center;width:clamp(34px,3vw,46px);height:clamp(34px,3vw,46px);
+  border-radius:10px;background:rgba(227,69,63,.16);color:var(--rojo-vivo);margin-bottom:clamp(8px,1vw,14px);
+}
+.icono-cifra svg{width:56%;height:56%}
+.icono-cifra.azul{background:rgba(63,182,232,.16);color:var(--azul-claro)}
+.icono-cifra.rojo{background:rgba(227,69,63,.16);color:var(--rojo-vivo)}
+.cabecera-categorias{display:flex;align-items:center;gap:12px}
+.cabecera-categorias svg{width:clamp(20px,1.8vw,30px);height:clamp(20px,1.8vw,30px);flex:0 0 auto}
+.total-inv{flex:1 1 240px;min-width:220px}
+.total-inv b{
+  display:block;font-family:var(--serif);font-weight:400;color:var(--rojo-vivo);
+  font-size:clamp(38px,5vw,84px);line-height:1;text-shadow:0 0 26px rgba(227,69,63,.55);
+}
+.total-inv span{font-family:var(--serif);font-size:clamp(14px,1.4vw,24px)}
+.barra-disp{
+  margin-top:10px;height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;
+  max-width:360px;
+}
+.barra-disp .relleno{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--azul),var(--azul-claro));transition:width .5s ease}
+.total-inv small{display:block;margin-top:6px;color:var(--tenue);font-family:var(--serif);font-size:clamp(11px,.95vw,16px)}
+.cifra-inv{
+  background:var(--panel-2);border:1px solid var(--linea);border-radius:12px;
+  padding:clamp(12px,1.4vw,22px) clamp(18px,2vw,32px);text-align:center;min-width:clamp(100px,9vw,140px);
+}
+.cifra-inv b{display:block;font-family:var(--serif);font-weight:400;font-size:clamp(28px,3vw,48px);line-height:1.1;color:var(--azul-claro)}
+.cifra-inv.rojo b{color:var(--rojo-vivo)}
+.cifra-inv span{font-family:var(--serif);font-size:clamp(12px,1.05vw,18px);color:var(--tenue)}
+
+/* ---------- tarjetas de categoría ---------- */
+.rejilla-categorias{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,1.5vw,24px)}
+.tarjeta-categoria{position:relative}
+.tarjeta-categoria-cuerpo{
+  background:var(--panel);border:1px solid var(--linea);border-radius:14px;text-align:left;width:100%;
+  padding:clamp(14px,1.6vw,24px);display:flex;flex-direction:column;gap:6px;
+  transition:transform .28s cubic-bezier(.2,.7,.3,1),border-color .25s ease,box-shadow .25s ease;
+}
+.tarjeta-categoria-cuerpo:hover{transform:translateY(-5px);border-color:rgba(63,182,232,.5);box-shadow:0 20px 40px rgba(0,0,0,.4)}
+.imagen-categoria{
+  width:100%;height:clamp(72px,7.2vw,112px);border-radius:10px;overflow:hidden;
+  background:rgba(63,182,232,.14);display:grid;place-items:center;color:var(--azul-claro);margin-bottom:4px;
+}
+.imagen-categoria img{width:100%;height:100%;object-fit:cover;display:block}
+.imagen-categoria svg{width:32%;height:32%}
+.tarjeta-categoria-cuerpo b{font-family:var(--serif);font-weight:400;font-size:clamp(24px,2.4vw,38px);line-height:1}
+.tarjeta-categoria-cuerpo>span{font-family:var(--serif);font-size:clamp(14px,1.2vw,21px)}
+.tarjeta-categoria-cuerpo small{color:var(--tenue);font-family:var(--serif);font-size:clamp(11px,.95vw,15px)}
+
+/* Botón flotante para cambiar la foto de la categoría, encima de
+   la esquina de la imagen — no interfiere con el clic de la
+   tarjeta porque detiene la propagación (ver inventario.js). */
+.btn-cambiar-imagen-cat{
+  position:absolute;top:clamp(10px,1.1vw,18px);right:clamp(10px,1.1vw,18px);
+  width:30px;height:30px;border-radius:50%;flex:0 0 auto;
+  background:rgba(10,14,20,.68);border:1px solid rgba(255,255,255,.22);color:#fff;
+  display:grid;place-items:center;transition:background .2s ease,transform .2s ease;
+}
+.btn-cambiar-imagen-cat svg{width:16px;height:16px}
+.btn-cambiar-imagen-cat:hover{background:rgba(227,69,63,.88);transform:scale(1.07)}
+
+/* ---------- tabla de recursos recientes (Resumen) ---------- */
+.tabla-recientes .fila{grid-template-columns:1.6fr .8fr .8fr .9fr}
+.recurso-nombre-celda{display:flex;align-items:center;gap:10px}
+
+/* ---------- miniatura de recurso (tabla + recientes) ---------- */
+.miniatura-recurso{
+  width:clamp(32px,3vw,42px);height:clamp(32px,3vw,42px);border-radius:8px;overflow:hidden;flex:0 0 auto;
+  background:#1E2733;display:grid;place-items:center;color:#7C8A99;border:1px solid var(--linea);
+}
+.miniatura-recurso img{width:100%;height:100%;object-fit:cover;display:block}
+.miniatura-recurso svg{width:56%;height:56%}
+
+/* ---------- acciones principales (Resumen) ---------- */
+.acciones-principales{display:flex;flex-direction:column;gap:10px}
+.btn-accion-inv{
+  display:flex;align-items:center;gap:14px;background:var(--panel-2);border:1px solid var(--linea);
+  border-radius:12px;color:var(--texto);padding:clamp(12px,1.3vw,20px) clamp(14px,1.5vw,24px);
+  font-family:var(--serif);font-size:clamp(14px,1.2vw,20px);text-align:left;
+  transition:border-color .22s ease,transform .22s ease,background .22s ease;
+}
+.btn-accion-inv svg{width:22px;height:22px;flex:0 0 auto;color:var(--rojo-vivo)}
+.btn-accion-inv:hover{transform:translateX(5px);border-color:rgba(227,69,63,.5);background:rgba(179,49,47,.12)}
+
+/* ---------- filtros de categoría (chips, en Recursos) ---------- */
+.filtros-categoria{display:flex;flex-wrap:wrap;gap:10px;margin:clamp(14px,1.8vw,24px) 0}
+.chip-categoria{
+  background:var(--panel-2);border:1px solid var(--linea);border-radius:999px;color:var(--texto);
+  padding:clamp(8px,.9vw,14px) clamp(16px,1.6vw,28px);font-family:var(--serif);font-size:clamp(13px,1.1vw,18px);
+  transition:border-color .22s ease,background .22s ease,transform .22s ease;
+}
+.chip-categoria:hover{transform:translateY(-2px)}
+.chip-categoria.is-on{border-color:var(--rojo-vivo);color:#fff;background:rgba(179,49,47,.2)}
+
+/* ---------- tabla de recursos ---------- */
+.tabla-recursos .fila{grid-template-columns:48px .65fr 1.5fr .85fr .55fr .75fr .8fr .55fr .95fr 56px}
+.etiqueta-estado{
+  display:inline-block;border-radius:8px;padding:3px 12px;font-size:clamp(11px,.95vw,16px);
+  border:1px solid currentColor;font-style:normal;
+}
+.etiqueta-estado.nuevo{color:var(--azul-claro)}
+.etiqueta-estado.usado{color:#F0AEAC}
+.etiqueta-estado.seminuevo{color:#E0A82E}
+.etiqueta.pendiente{color:#E0A82E}
+
+/* ---------- formulario de nuevo recurso ---------- */
+.form-recurso{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,1.4vw,24px) clamp(14px,2vw,34px)}
+.foto-carga-recurso .previa{border-radius:14px}
+.foto-carga-recurso .previa img{border-radius:14px}
+
+/* ---------- formulario + vista previa (Entrada/Entrega/Devolución) ---------- */
+.rejilla-forma-preview{display:grid;grid-template-columns:1.6fr 1fr;gap:clamp(16px,2vw,32px);align-items:start}
+.rejilla-forma-preview form{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,1.4vw,22px) clamp(14px,2vw,30px);align-content:start}
+.preview-mov{position:sticky;top:clamp(12px,1.5vw,24px)}
+.preview-mov h3{font-family:var(--serif);font-weight:400;color:var(--rojo-vivo);font-size:clamp(17px,1.6vw,26px);margin:0 0 clamp(12px,1.4vw,20px)}
+.preview-dato{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--linea-2);font-family:var(--serif);font-size:clamp(13px,1.1vw,18px)}
+.preview-dato span{color:var(--tenue)}
+.preview-dato b{font-weight:400;text-align:right}
+.preview-numeros{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:center;
+  margin:clamp(16px,1.8vw,26px) 0;padding:clamp(12px,1.4vw,20px) 0;border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+}
+.preview-numeros small{display:block;color:var(--tenue);font-family:var(--serif);font-size:clamp(11px,.9vw,14px);margin-bottom:4px}
+.preview-numeros b{font-family:var(--serif);font-weight:400;font-size:clamp(20px,2vw,32px)}
+.preview-numeros .suma b{color:var(--verde)}
+.preview-numeros .resta b{color:var(--rojo-vivo)}
+.preview-numeros .resultado b{color:var(--azul-claro)}
+.nota-preview{
+  display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:clamp(12px,1.05vw,17px);
+  color:#C9D5E1;margin:0;
+}
+.nota-preview svg{width:20px;height:20px;color:var(--azul);flex:0 0 auto}
+.nota-preview.ok svg{color:var(--verde)}
+
+/* ---------- toggles de condición (Devolución) ---------- */
+.segmentado-condicion{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;grid-column:1/-1}
+.segmentado-condicion button{
+  background:var(--panel-2);border:1px solid var(--linea);border-radius:10px;color:var(--texto);
+  padding:clamp(9px,1vw,15px) 6px;font-family:var(--serif);font-size:clamp(12px,1vw,16px);
+  transition:transform .2s ease,border-color .2s ease,background .2s ease;
+}
+.segmentado-condicion button.is-on.verde{background:rgba(24,190,45,.18);border-color:var(--verde);color:#fff}
+.segmentado-condicion button.is-on.rojo{background:rgba(227,69,63,.18);border-color:var(--rojo-vivo);color:#fff}
+.segmentado-condicion button.is-on.amarillo{background:rgba(224,168,46,.18);border-color:#E0A82E;color:#fff}
+.segmentado-condicion button.is-on.gris{background:rgba(147,161,175,.18);border-color:var(--tenue);color:#fff}
+
+/* ---------- conteo físico ---------- */
+.resumen-conteo{display:flex;align-items:center;gap:clamp(14px,2vw,30px);flex-wrap:wrap;font-family:var(--serif);font-size:clamp(13px,1.1vw,18px);color:#C9D5E1}
+.badge-conteo{display:flex;align-items:center;gap:10px;font-size:clamp(15px,1.3vw,22px);color:var(--texto)}
+.tabla-conteo .fila{grid-template-columns:1.6fr .6fr .8fr .6fr}
+.tabla-conteo .input-fisico{
+  width:90px;background:var(--panel-2);border:1px solid var(--linea);border-radius:8px;color:var(--texto);
+  font-family:var(--serif);font-size:15px;padding:6px 10px;
+}
+.tabla-diferencias .fila{grid-template-columns:1.6fr .6fr .6fr .8fr}
+
+/* ---------- historial de movimientos ---------- */
+.tabla-historial .fila{grid-template-columns:.8fr .8fr 1.3fr 1.1fr .7fr 1fr .8fr}
+.etiqueta-mov{
+  display:inline-block;border-radius:8px;padding:3px 12px;font-size:clamp(11px,.95vw,16px);
+  font-style:normal;border:1px solid currentColor;
+}
+.etiqueta-mov.tipo-entrada{color:var(--verde)}
+.etiqueta-mov.tipo-entrega{color:var(--azul-claro)}
+.etiqueta-mov.tipo-devolucion{color:#C58CF0}
+.etiqueta-mov.tipo-ajuste{color:#E0A82E}
+
+/* ---------- responsive de Inventario ---------- */
+@media (max-width:1180px){
+  .rejilla-categorias{grid-template-columns:repeat(2,1fr)}
+  .rejilla-forma-preview{grid-template-columns:1fr}
+  .rejilla-forma-preview form{grid-template-columns:1fr}
+  .form-recurso{grid-template-columns:1fr}
+  .preview-mov{position:static}
+}
+@media (max-width:900px){
+  .tabla-recursos .fila,.tabla-historial .fila,.tabla-conteo .fila,.tabla-diferencias .fila,.tabla-recientes .fila{grid-template-columns:1fr 1fr}
+  .tabla-recursos .fila.encabezado,.tabla-historial .fila.encabezado,.tabla-conteo .fila.encabezado,.tabla-diferencias .fila.encabezado,.tabla-recientes .fila.encabezado{display:none}
+  .segmentado-condicion{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:560px){
+  .rejilla-categorias{grid-template-columns:1fr}
+  .panel-inv{flex-direction:column;align-items:stretch}
+}

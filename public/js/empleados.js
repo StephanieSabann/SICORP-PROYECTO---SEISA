@@ -45,6 +45,26 @@ async function api(url, metodo = 'GET', cuerpo = null) {
 
 /* ---------------- Cargar Datos desde la API ---------------- */
 /* BACKEND: Reemplaza tu cargarTodos() actual */
+/* Tipos de empleado. Los técnicos se dividen en socio / no socio (lo usa
+   Nóminas para mostrar solo los técnicos de cada tipo). Un técnico creado antes
+   de este cambio queda "sin clasificar" hasta que se le escoja uno. */
+const TIPOS_EMPLEADO = {
+  TECNICO_SOCIO: 'Técnico socio',
+  TECNICO_NO_SOCIO: 'Técnico no socio',
+  AUXILIAR: 'Auxiliar',
+  ADMINISTRATIVO: 'Administrativo'
+};
+const PUESTO_POR_TIPO = { TECNICO_SOCIO: 2, TECNICO_NO_SOCIO: 2, AUXILIAR: 3, ADMINISTRATIVO: 1 };
+function tipoDeEmpleado(e){
+  let codigo = e.tipo_empleado || null;
+  if (!codigo) codigo = e.id_puesto === 1 ? 'ADMINISTRATIVO' : e.id_puesto === 3 ? 'AUXILIAR' : null;
+  return {
+    tipoCodigo: codigo,
+    tipo: TIPOS_EMPLEADO[codigo] || 'Técnico (sin clasificar)',
+    esTecnico: !codigo || codigo.startsWith('TECNICO')
+  };
+}
+
 async function cargarTodos() {
   try {
     const respuesta = await api('/api/empleados'); // Ruta GET
@@ -59,7 +79,8 @@ async function cargarTodos() {
       direccion: e.direccion || '',
       ingreso: e.fecha_contratacion ? e.fecha_contratacion.split('T')[0] : '',
       estado: e.activo ? 'activo' : 'inactivo',
-      tipo: e.id_puesto === 1 ? 'Administrativo' : 'Técnico',
+      ...tipoDeEmpleado(e),
+      salario: e.salario_base !== null && e.salario_base !== undefined ? Number(e.salario_base).toFixed(2) : '',
       nacimiento: e.fecha_nacimiento ? e.fecha_nacimiento.split('T')[0] : '',
     }));
 
@@ -101,9 +122,9 @@ window.addEventListener('hashchange', () => {
    ============================================================ */
 function actualizarCifras(){
   contar(document.getElementById('totalActivos'), empleados.filter(e => e.estado === 'activo').length);
-  contar(document.getElementById('totalTecnicos'), empleados.filter(e => e.tipo === 'Técnico').length);
-  contar(document.getElementById('totalAuxiliares'), empleados.filter(e => e.tipo === 'Auxiliar').length);
-  contar(document.getElementById('totalAdmin'), empleados.filter(e => e.tipo === 'Administrativo').length);
+  contar(document.getElementById('totalTecnicos'), empleados.filter(e => e.esTecnico).length);
+  contar(document.getElementById('totalAuxiliares'), empleados.filter(e => e.tipoCodigo === 'AUXILIAR').length);
+  contar(document.getElementById('totalAdmin'), empleados.filter(e => e.tipoCodigo === 'ADMINISTRATIVO').length);
 }
 
 /* ============================================================
@@ -132,7 +153,7 @@ function filtradosEmp(){
   return empleados.filter(e => {
     const coincide = !texto || (e.nombre + ' ' + e.codigo).toLowerCase().includes(texto);
     return coincide
-      && (!tipo || e.tipo === tipo)
+      && (!tipo || (tipo === 'SIN_CLASIFICAR' ? !e.tipoCodigo : e.tipoCodigo === tipo))
       && (!unidad || e.unidad === unidad)
       && (!estado || e.estado === estado);
   });
@@ -158,7 +179,7 @@ function pintarLista(){
 }
 
 function puntoTipo(tipo){
-  return tipo === 'Técnico' ? 'tecnico' : tipo === 'Auxiliar' ? 'auxiliar' : 'administrativo';
+  return tipo === 'Auxiliar' ? 'auxiliar' : tipo === 'Administrativo' ? 'administrativo' : 'tecnico';
 }
 
 function pintarTarjetas(lista){
@@ -356,7 +377,7 @@ const fCampos = {
   salario: document.getElementById('fSalario'),
   unidad: document.getElementById('fUnidad')
 };
-let tipoSeleccionado = 'Técnico';
+let tipoSeleccionado = 'TECNICO_SOCIO';
 
 /* Contador de caracteres para los campos que tienen un límite corto
    en la base de datos (nombre completo y dirección). Se pone amarillo
@@ -381,7 +402,8 @@ document.querySelectorAll('#segmentadoTipo [data-tipo]').forEach(b => {
   b.addEventListener('click', () => {
     tipoSeleccionado = b.dataset.tipo;
     document.querySelectorAll('#segmentadoTipo [data-tipo]').forEach(x => x.classList.toggle('is-on', x === b));
-    fCampos.unidad.closest('.campo').style.opacity = tipoSeleccionado === 'Administrativo' ? '.5' : '1';
+    fCampos.unidad.closest('.campo').style.opacity = tipoSeleccionado === 'ADMINISTRATIVO' ? '.5' : '1';
+    document.getElementById('errorTipo').hidden = true;
   });
 });
 
@@ -425,9 +447,11 @@ function abrirFormularioEmpleado(emp){
     : 'Crea el expediente laboral de una nueva persona.';
   document.getElementById('btnGuardarEmpleado').lastChild.textContent = emp ? ' Guardar cambios' : ' Crear empleado';
 
-  tipoSeleccionado = emp ? emp.tipo : 'Técnico';
+  // Técnico viejo sin clasificar: no se marca nada y hay que escoger socio / no socio
+  tipoSeleccionado = emp ? emp.tipoCodigo : 'TECNICO_SOCIO';
   document.querySelectorAll('#segmentadoTipo [data-tipo]').forEach(x =>
     x.classList.toggle('is-on', x.dataset.tipo === tipoSeleccionado));
+  document.getElementById('errorTipo').hidden = true;
 
   if (emp){
     fCampos.nombre.value = emp.nombre;
@@ -490,23 +514,21 @@ function siguienteCodigo(){
    ============================================================ */
 formEmpleado.addEventListener('submit', async e => { // Agregamos 'async'
   e.preventDefault();
-  if (!validarEmpleado(true)) return; // Validaciones de la interfaz[cite: 1]
+  const sinTipo = !TIPOS_EMPLEADO[tipoSeleccionado];
+  document.getElementById('errorTipo').hidden = !sinTipo;
+  if (!validarEmpleado(true) || sinTipo) return; // Validaciones de la interfaz[cite: 1]
 
   // 1. Separar el nombre del formulario para la base de datos
   const partesNombre = fCampos.nombre.value.trim().split(' ');
   const nombreDB = partesNombre[0] || '';
   const apellidoDB = partesNombre.slice(1).join(' ') || '';
 
-  const mapaPuestos = {
-    'Administrativo': 1,
-    'Técnico': 2,
-    'Auxiliar': 3
-  };
-
   // 2. Preparar el objeto con los datos que espera tu SQL
   const valorNit = fCampos.nit.value.trim();
   const datosDB = {
-  id_puesto: mapaPuestos[tipoSeleccionado] || 1, // Se envía como número entero positivo
+  id_puesto: PUESTO_POR_TIPO[tipoSeleccionado], // Se envía como número entero positivo
+  tipo_empleado: tipoSeleccionado,
+  salario_base: Number(fCampos.salario.value) || 0,
   nombre: nombreDB,
   apellido: apellidoDB,
   dpi: fCampos.dpi.value.trim(),
@@ -537,7 +559,7 @@ formEmpleado.addEventListener('submit', async e => { // Agregamos 'async'
       : 'El expediente se creó y ya está disponible en el directorio.';
     
     document.getElementById('okNombre').textContent = fCampos.nombre.value.trim();
-    document.getElementById('okDatos').textContent = tipoSeleccionado + ' • ' + (fCampos.puesto.value.trim() || 'Sin puesto');
+    document.getElementById('okDatos').textContent = TIPOS_EMPLEADO[tipoSeleccionado] + ' • ' + (fCampos.puesto.value.trim() || 'Sin puesto');
 
     // Limpiar formulario y cerrar[cite: 1]
     formEmpleado.reset();
@@ -587,7 +609,7 @@ function abrirExpediente(codigo, editar){
   document.getElementById('expCodigo').textContent = emp.codigo;
   document.getElementById('expEstado').textContent = emp.estado === 'activo' ? 'Activo' : 'Inactivo';
   document.getElementById('expEstado').className = 'etiqueta ' + emp.estado;
-  document.getElementById('expTipo').value = emp.tipo;
+  document.getElementById('expTipo').value = emp.tipoCodigo || '';
   document.getElementById('expPunto').className = 'punto ' + puntoTipo(emp.tipo);
   document.getElementById('expPuesto').textContent = emp.puesto || '—';
   document.getElementById('expUnidad').textContent = emp.unidad || 'Sin unidad';
@@ -609,13 +631,13 @@ function abrirExpediente(codigo, editar){
   let pareja = null;
   if (emp.unidad){
     pareja = empleados.find(x => x.unidad === emp.unidad && x.codigo !== emp.codigo &&
-      ((emp.tipo === 'Técnico' && x.tipo === 'Auxiliar') || (emp.tipo === 'Auxiliar' && x.tipo === 'Técnico')));
+      ((emp.esTecnico && x.tipoCodigo === 'AUXILIAR') || (emp.tipoCodigo === 'AUXILIAR' && x.esTecnico)));
   }
-  if (emp.tipo === 'Administrativo' || (!pareja && !emp.vehiculo)){
+  if (emp.tipoCodigo === 'ADMINISTRATIVO' || (!pareja && !emp.vehiculo)){
     caja.innerHTML = `<span style="color:var(--tenue);font-family:var(--serif)">Sin asignación registrada.</span>`;
   } else {
-    const tecnico = emp.tipo === 'Técnico' ? emp : pareja;
-    const auxiliar = emp.tipo === 'Auxiliar' ? emp : pareja;
+    const tecnico = emp.esTecnico ? emp : pareja;
+    const auxiliar = emp.tipoCodigo === 'AUXILIAR' ? emp : pareja;
     let html = '';
     if (tecnico) html += `<div class="nodo"><span class="aro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M4.8 20c.8-3.6 3.7-5.6 7.2-5.6s6.4 2 7.2 5.6"/></svg></span><div><small>Técnico</small><strong>${escapar(tecnico.nombre)}</strong></div></div>`;
     if (emp.vehiculo || (tecnico && tecnico.vehiculo)){
@@ -714,13 +736,14 @@ document.getElementById('btnGuardarExp').addEventListener('click', async () => {
   const nombreDB = partesNombre[0] || '';
   const apellidoDB = partesNombre.slice(1).join(' ') || '';
 
-  // 2. Mapear puesto
-  const mapaPuestos = {
-    'Administrativo': 1,
-    'Técnico': 2,
-    'Auxiliar': 3
-  };
+  // 2. Tipo de empleado (el puesto se deriva de él)
   const tipoSeleccionado = document.getElementById('expTipo').value;
+  if (!TIPOS_EMPLEADO[tipoSeleccionado]) {
+    avisar('Escoge el tipo de empleado (Técnico socio o Técnico no socio).');
+    document.getElementById('expTipo').focus();
+    return;
+  }
+  const salarioExp = document.getElementById('dSalario').value.trim();
 
   // 3. Preparar objeto para SQL
   const valorNitExp = document.getElementById('dNit').value.trim();
@@ -733,7 +756,9 @@ document.getElementById('btnGuardarExp').addEventListener('click', async () => {
     email: document.getElementById('dCorreo').value.trim(),
     direccion: document.getElementById('dDireccion').value.trim(),
     fecha_contratacion: document.getElementById('dIngreso').value,
-    id_puesto: mapaPuestos[tipoSeleccionado] || 1,
+    id_puesto: PUESTO_POR_TIPO[tipoSeleccionado],
+    tipo_empleado: tipoSeleccionado,
+    ...(salarioExp !== '' ? { salario_base: Number(salarioExp.replace(/[,Qq\s]/g, '')) || 0 } : {}),
     fecha_nacimiento: document.getElementById('dNacimiento').value,
   };
 
@@ -918,3 +943,8 @@ llenarUnidades();
 actualizarCifras();
 pintarLista();
 if (location.hash.slice(1) === 'nuevo') abrirFormularioEmpleado(null);
+
+/* Al cambiar el tipo en el expediente se actualiza el punto de color */
+document.getElementById('expTipo').addEventListener('change', e => {
+  document.getElementById('expPunto').className = 'punto ' + puntoTipo(TIPOS_EMPLEADO[e.target.value]);
+});
