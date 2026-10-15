@@ -1,0 +1,7 @@
+.env
+node_modules/
+comandossql.txt
+# Archivos de EEGSA importados en Nóminas (no se suben al repositorio)
+almacen/nominas/*
+!almacen/nominas/LEEME.txt
+almacen/demo/
