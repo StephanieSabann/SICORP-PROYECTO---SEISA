@@ -1,0 +1,25 @@
+{
+  "name": "seisa-sistema-definitivo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "node --test pruebas/*.test.js",
+    "start": "node server.js",
+    "demo": "node pruebas/servidorDemo.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "mssql": "^12.7.2",
+    "multer": "^2.0.0",
+    "nodemailer": "^10.0.10",
+    "pdfkit": "^0.15.2",
+    "xlsx": "^0.18.5"
+  }
+}
