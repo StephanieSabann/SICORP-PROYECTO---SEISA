@@ -435,6 +435,19 @@ button{font:inherit;cursor:pointer}
 .input-icon input::placeholder{color:#8C9AA8}
 .input-icon input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(21,84,180,.16)}
 .input-icon.error input{border-color:var(--red);box-shadow:0 0 0 3px rgba(227,69,63,.14)}
+/* el ícono queda encima del campo aunque el campo se mueva al enfocarlo
+   (antes el candado desaparecía al hacer clic en la contraseña) */
+.input-icon > svg{z-index:1;pointer-events:none}
+.input-icon .ojo-login{z-index:2}
+/* Ojo para ver / ocultar la contraseña del login */
+#l-pass input{padding-right:58px}
+.input-icon .ojo-login{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:40px;height:40px;
+  display:grid;place-items:center;border:0;border-radius:10px;background:transparent;color:#5E7286;cursor:pointer;padding:0;z-index:1}
+.input-icon .ojo-login:hover,.input-icon .ojo-login:focus-visible{background:rgba(31,127,208,.1);color:#1F7FD0;outline:none}
+.input-icon .ojo-login svg,.input-icon:focus-within .ojo-login svg{position:static;transform:none;width:22px;height:22px}
+.input-icon .ojo-login .ojo-cerrado{display:none}
+.input-icon .ojo-login.visible .ojo-abierto{display:none}
+.input-icon .ojo-login.visible .ojo-cerrado{display:block}
 .login-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 clamp(18px,2.2vw,30px)}
 .remember{display:flex;align-items:center;gap:12px;font-size:clamp(14px,1.15vw,20px);cursor:pointer}
 .remember input{width:22px;height:22px;accent-color:var(--blue);cursor:pointer}

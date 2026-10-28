@@ -56,4 +56,34 @@ async function enviarCorreoRespuesta({ para, asuntoOriginal, textoRespuesta }) {
     }
 }
 
-module.exports = { enviarCorreoRespuesta };
+/* Correo con archivos adjuntos (lo usan los reportes programados).
+   Mismas reglas que arriba: sin credenciales o sin nodemailer no truena,
+   solo devuelve enviado:false con el motivo. */
+async function enviarCorreoConAdjuntos({ para, asunto, texto, adjuntos = [] }) {
+    if (!process.env.EMAIL_USUARIO || !process.env.EMAIL_CLAVE) {
+        return { enviado: false, motivo: "No hay credenciales de correo configuradas en .env." };
+    }
+    let nodemailer;
+    try {
+        nodemailer = require("nodemailer");
+    } catch (error) {
+        return { enviado: false, motivo: 'Falta instalar nodemailer (corre "npm install nodemailer").' };
+    }
+    try {
+        const transportador = nodemailer.createTransport({
+            service: "gmail",
+            auth: { user: process.env.EMAIL_USUARIO, pass: process.env.EMAIL_CLAVE }
+        });
+        await transportador.sendMail({
+            from: `"SICORP — SEISA" <${process.env.EMAIL_USUARIO}>`,
+            to: para, subject: asunto, text: texto,
+            attachments: adjuntos.map(a => ({ filename: a.filename, content: a.content }))
+        });
+        return { enviado: true };
+    } catch (error) {
+        console.error("Error al enviar el reporte por correo:", error);
+        return { enviado: false, motivo: "Hubo un error al mandar el correo: " + error.message };
+    }
+}
+
+module.exports = { enviarCorreoRespuesta, enviarCorreoConAdjuntos };

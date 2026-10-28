@@ -16,7 +16,9 @@ async function obtenerTodos() {
             email,
             fecha_contratacion,
             activo,
-            fecha_nacimiento
+            fecha_nacimiento,
+            tipo_empleado,
+            salario_base
         FROM Empleado
         ORDER BY nombre, apellido, codigo_empleado
     `);
@@ -67,6 +69,8 @@ async function crear(datos) {
         .input("fecha_contratacion", sql.Date, datos.fecha_contratacion)
         .input("activo", sql.Bit, datos.activo)
         .input("fecha_nacimiento", sql.Date, datos.fecha_nacimiento)
+        .input("tipo_empleado", sql.VarChar(20), datos.tipo_empleado ?? null)
+        .input("salario_base", sql.Decimal(12, 2), datos.salario_base ?? null)
         .query(`
             INSERT INTO Empleado
             (
@@ -80,7 +84,9 @@ async function crear(datos) {
                 email,
                 fecha_contratacion,
                 activo,
-                fecha_nacimiento
+                fecha_nacimiento,
+                tipo_empleado,
+                salario_base
             )
             OUTPUT
                 INSERTED.codigo_empleado,
@@ -94,7 +100,9 @@ async function crear(datos) {
                 INSERTED.email,
                 INSERTED.fecha_contratacion,
                 INSERTED.activo,
-                INSERTED.fecha_nacimiento
+                INSERTED.fecha_nacimiento,
+                INSERTED.tipo_empleado,
+                INSERTED.salario_base
             VALUES
             (
                 @id_puesto,
@@ -107,7 +115,9 @@ async function crear(datos) {
                 @email,
                 @fecha_contratacion,
                 @activo,
-                @fecha_nacimiento
+                @fecha_nacimiento,
+                @tipo_empleado,
+                @salario_base
             )
         `);
 
@@ -132,6 +142,8 @@ async function actualizar(codigoEmpleado, datos) {
         fecha_contratacion: [sql.Date, datos.fecha_contratacion],
         activo: [sql.Bit, datos.activo],
         fecha_nacimiento: [sql.Date, datos.fecha_nacimiento],
+        tipo_empleado: [sql.VarChar(20), datos.tipo_empleado],
+        salario_base: [sql.Decimal(12, 2), datos.salario_base],
     };
 
     const campos = Object.keys(datos).map(campo => {
@@ -155,7 +167,9 @@ async function actualizar(codigoEmpleado, datos) {
             INSERTED.email,
             INSERTED.fecha_contratacion,
             INSERTED.activo,
-            INSERTED.fecha_nacimiento
+            INSERTED.fecha_nacimiento,
+            INSERTED.tipo_empleado,
+            INSERTED.salario_base
         WHERE codigo_empleado = @codigo_empleado
     `);
 

@@ -11,6 +11,8 @@
     href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="css/panel.css">
+  <link rel="stylesheet" href="css/inventario.css">
+  <link rel="stylesheet" href="css/mant-extra.css">
   <script>document.documentElement.classList.add('js-anim');</script>
 </head>
 
@@ -157,10 +159,6 @@
           <button class="tab-mant" data-tab="nomina" role="tab" aria-selected="false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="4" y="3" width="13" height="18" rx="2"/><path d="M17 7h3v11a3 3 0 0 1-3 3"/><path d="M8 8h5M8 12h5M8 16h3" stroke-linecap="round"/></svg>
             Nómina
-          </button>
-          <button class="tab-mant" data-tab="reportes" role="tab" aria-selected="false">
-            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="13" width="4" height="8" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>
-            Reportes
           </button>
           <button class="tab-mant" data-tab="soporte" role="tab" aria-selected="false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M3 7l9 6 9-6"/></svg>
@@ -320,14 +318,65 @@
           </div>
         </section>
 
-        <!-- ---------- EN CONSTRUCCIÓN ---------- -->
+        <!-- ---------- INVENTARIO: categorías de recursos ---------- -->
         <section class="panel-mant" id="panel-inventario">
-          <div class="tarjeta pendiente-mant">
-            <h2 class="cabecera">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 8v.01M12 11.5v4.5"/></svg>
-              Mantenimiento de Inventario
-            </h2>
-            <p class="nota" style="margin:0">Esta pestaña está lista para cuando se termine el módulo de Inventario.</p>
+          <div class="rejilla-mant">
+            <form class="tarjeta form-categoria" id="formNuevaCategoria" novalidate>
+              <h2 class="cabecera" style="margin-bottom:0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.2"/><path d="M17 14v6M14 17h6" stroke-linecap="round"/></svg>
+                <span id="tituloFormCategoria">Nueva categoría</span>
+              </h2>
+              <p class="nota" style="margin:0">Las categorías agrupan los recursos del inventario (Herramientas, EPP, Equipos, Uniformes...). Cada una tiene su imagen y su color en las tarjetas del Resumen y de Recursos.</p>
+
+              <div class="fila-cat-imagen">
+                <span class="cat-circulo" id="previaCategoria" style="--color-cat:#4F7DF3">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="8.5" cy="10.5" r="1.6"/><path d="M21 16l-5.5-5.5-3 3L9 10l-6 6"/></svg>
+                </span>
+                <div>
+                  <div class="foto-carga-botones">
+                    <label class="btn-linea chico" for="categoriaImagen" style="cursor:pointer">Subir imagen</label>
+                    <button type="button" class="btn-linea chico quitar" id="btnQuitarImagenCategoria" hidden>Quitar</button>
+                  </div>
+                  <input type="file" id="categoriaImagen" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+                  <small class="nota" style="display:block;margin-top:6px">JPG, PNG, WEBP o GIF · máximo 5 MB.</small>
+                </div>
+              </div>
+
+              <label class="campo">
+                <span>Nombre de la categoría <i class="obligatorio">*</i></span>
+                <input type="text" id="categoriaNombre" placeholder="Ej. Escaleras" maxlength="50">
+                <em class="error">Escribe el nombre (máximo 50 caracteres).</em>
+              </label>
+
+              <div class="campo">
+                <span>Color</span>
+                <div class="colores-cat" id="coloresCategoria"></div>
+              </div>
+
+              <div class="acciones-form" style="margin-top:4px;justify-content:flex-start">
+                <button type="submit" class="btn-rojo">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  <span id="textoBtnCategoria">Crear categoría</span>
+                </button>
+                <button type="button" class="btn-linea" id="btnCancelarCategoria" hidden>Cancelar</button>
+              </div>
+            </form>
+
+            <div class="tarjeta">
+              <h2 class="cabecera">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linejoin="round"><rect x="3.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.2"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.2"/></svg>
+                Categorías existentes
+              </h2>
+              <div class="lista-cat-mant" id="listaCategoriasMant">
+                <p class="vacio-mini">Cargando categorías…</p>
+              </div>
+              <div class="acciones-form" style="justify-content:flex-start">
+                <a class="btn-linea" href="inventario.html" style="text-decoration:none">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                  Ir a Inventario
+                </a>
+              </div>
+            </div>
           </div>
         </section>
         <section class="panel-mant" id="panel-nomina">
@@ -337,15 +386,6 @@
               Mantenimiento de Nómina
             </h2>
             <p class="nota" style="margin:0">Esta pestaña está lista para cuando se termine el módulo de Nóminas.</p>
-          </div>
-        </section>
-        <section class="panel-mant" id="panel-reportes">
-          <div class="tarjeta pendiente-mant">
-            <h2 class="cabecera">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#E3453F" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 8v.01M12 11.5v4.5"/></svg>
-              Mantenimiento de Reportes
-            </h2>
-            <p class="nota" style="margin:0">Esta pestaña está lista para cuando se termine el módulo de Reportes.</p>
           </div>
         </section>
 
@@ -466,6 +506,8 @@
   <div class="aviso" id="aviso" role="status"></div>
   <script src="js/comun.js"></script>
   <script src="js/mantenimiento.js"></script>
+  <script src="js/mant-comun.js"></script>
+  <script src="js/mant-nomina.js"></script>
 </body>
 
 </html>

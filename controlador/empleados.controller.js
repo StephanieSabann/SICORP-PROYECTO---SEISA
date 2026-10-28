@@ -58,6 +58,38 @@ function validarNit(valor) {
     return numero;
 }
 
+const TIPOS_EMPLEADO = ["TECNICO_SOCIO", "TECNICO_NO_SOCIO", "AUXILIAR", "ADMINISTRATIVO"];
+// Puesto que corresponde a cada tipo (la tabla Puesto ya existía: 1 Administrativo, 2 Técnico, 3 Auxiliar)
+const PUESTO_POR_TIPO = { TECNICO_SOCIO: 2, TECNICO_NO_SOCIO: 2, AUXILIAR: 3, ADMINISTRATIVO: 1 };
+
+function validarTipoEmpleado(valor) {
+    if (valor === undefined || valor === null || valor === "") {
+        return null;
+    }
+
+    const tipo = String(valor).trim().toUpperCase();
+
+    if (!TIPOS_EMPLEADO.includes(tipo)) {
+        throw new Error("El tipo de empleado debe ser Técnico socio, Técnico no socio, Auxiliar o Administrativo.");
+    }
+
+    return tipo;
+}
+
+function validarSalario(valor) {
+    if (valor === undefined || valor === null || valor === "") {
+        return null;
+    }
+
+    const numero = Number(String(valor).replace(/[,\sQq]/g, ""));
+
+    if (!Number.isFinite(numero) || numero < 0 || numero > 9999999999) {
+        throw new Error("El sueldo base debe ser un número mayor o igual a 0.");
+    }
+
+    return Math.round(numero * 100) / 100;
+}
+
 function validarActivo(valor) {
     if (valor === undefined || valor === null) {
         return 1;
@@ -140,10 +172,13 @@ async function crear(req, res) {
             email,
             fecha_contratacion,
             fecha_nacimiento,
-            activo
+            activo,
+            tipo_empleado,
+            salario_base
         } = req.body;
 
-        const idPuesto = Number(id_puesto);
+        const tipoEmpleado = validarTipoEmpleado(tipo_empleado);
+        const idPuesto = tipoEmpleado ? PUESTO_POR_TIPO[tipoEmpleado] : Number(id_puesto);
 
         if (!Number.isInteger(idPuesto) || idPuesto <= 0) {
             throw new Error("El id_puesto debe ser un número entero positivo.");
@@ -166,7 +201,9 @@ async function crear(req, res) {
             email: emailLimpio,
             fecha_contratacion: validarFecha(fecha_contratacion, "de contratación"),
             fecha_nacimiento: validarFecha(fecha_nacimiento, "de nacimiento"),
-            activo: validarActivo(activo)
+            activo: validarActivo(activo),
+            tipo_empleado: tipoEmpleado,
+            salario_base: validarSalario(salario_base)
         });
 
         res.status(201).json({
@@ -207,7 +244,9 @@ async function actualizar(req, res) {
             "email",
             "fecha_contratacion",
             "fecha_nacimiento",
-            "activo"
+            "activo",
+            "tipo_empleado",
+            "salario_base"
         ];
 
         const camposEnviados = camposPermitidos.filter(campo =>
@@ -255,7 +294,16 @@ async function actualizar(req, res) {
                 datos.fecha_nacimiento = validarFecha(req.body.fecha_nacimiento, "de nacimiento");
             } else if (campo === "activo") {
                 datos.activo = validarActivo(req.body.activo);
+            } else if (campo === "tipo_empleado") {
+                datos.tipo_empleado = validarTipoEmpleado(req.body.tipo_empleado);
+            } else if (campo === "salario_base") {
+                datos.salario_base = validarSalario(req.body.salario_base);
             }
+        }
+
+        // El puesto siempre sigue al tipo de empleado
+        if (datos.tipo_empleado) {
+            datos.id_puesto = PUESTO_POR_TIPO[datos.tipo_empleado];
         }
 
         const empleadoActualizado = await model.actualizar(codigoEmpleado, datos);

@@ -25,7 +25,7 @@ document.querySelectorAll('.tab-mant').forEach(boton => {
   });
 });
 (function abrirPestañaInicial(){
-  const tab = ['usuarios','empleados','inventario','nomina','reportes','soporte']
+  const tab = ['usuarios','empleados','inventario','nomina','soporte']
     .includes(location.hash.slice(1)) ? location.hash.slice(1) : 'usuarios';
   document.querySelector(`.tab-mant[data-tab="${tab}"]`)?.click();
 })();
@@ -650,6 +650,192 @@ document.getElementById('formResponderChat').addEventListener('submit', async e 
   }
 });
 
+/* ============================================================
+   INVENTARIO: categorías de recursos (crear, editar, imagen, borrar)
+   ============================================================ */
+const COLORES_CATEGORIA = ['#4F7DF3', '#22C2B5', '#E3453F', '#A855F7', '#F59E0B', '#EC4899', '#10B981', '#38BDF8'];
+const ICONO_IMAGEN_CAT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="8.5" cy="10.5" r="1.6"/><path d="M21 16l-5.5-5.5-3 3L9 10l-6 6"/></svg>';
+let categoriasMant = [];
+let categoriaEditando = null;
+let archivoCategoria = null;
+let colorCategoriaElegido = COLORES_CATEGORIA[0];
+
+const rutaImg = ruta => !ruta ? '' : (/^(https?:|data:|\/)/.test(ruta) ? ruta : '/' + ruta);
+
+function pintarColoresCategoria(){
+  const caja = document.getElementById('coloresCategoria');
+  const enLista = COLORES_CATEGORIA.includes(colorCategoriaElegido.toUpperCase());
+  caja.innerHTML = COLORES_CATEGORIA.map(c =>
+    `<button type="button" class="color-cat ${c === colorCategoriaElegido.toUpperCase() ? 'is-on' : ''}" style="--c:${c}" data-color="${c}" aria-label="Color ${c}"></button>`
+  ).join('') +
+    `<input type="color" id="colorCategoriaLibre" value="${colorCategoriaElegido}" title="Otro color" ${enLista ? '' : 'class="is-on"'}>`;
+  caja.querySelectorAll('[data-color]').forEach(b => b.addEventListener('click', () => {
+    colorCategoriaElegido = b.dataset.color;
+    pintarColoresCategoria();
+    pintarPreviaCategoria();
+  }));
+  document.getElementById('colorCategoriaLibre').addEventListener('input', e => {
+    colorCategoriaElegido = e.target.value.toUpperCase();
+    caja.querySelectorAll('.color-cat').forEach(b => b.classList.remove('is-on'));
+    pintarPreviaCategoria();
+  });
+}
+
+function pintarPreviaCategoria(src){
+  const previa = document.getElementById('previaCategoria');
+  previa.style.setProperty('--c', colorCategoriaElegido);
+  if (src !== undefined) {
+    previa.innerHTML = ICONO_IMAGEN_CAT + (src ? `<img src="${escaparMant(src)}" alt="">` : '');
+    document.getElementById('btnQuitarImagenCategoria').hidden = !src;
+  }
+}
+
+document.getElementById('categoriaImagen').addEventListener('change', e => {
+  const archivo = e.target.files[0];
+  e.target.value = '';
+  if (!archivo) return;
+  if (!/^image\/(png|jpeg|webp|gif)$/.test(archivo.type)) { avisar('La imagen debe ser JPG, PNG, WEBP o GIF.'); return; }
+  if (archivo.size > 5 * 1024 * 1024) { avisar('La imagen pesa más de 5 MB.'); return; }
+  archivoCategoria = archivo;
+  const lector = new FileReader();
+  lector.onload = () => pintarPreviaCategoria(lector.result);
+  lector.readAsDataURL(archivo);
+});
+document.getElementById('btnQuitarImagenCategoria').addEventListener('click', () => {
+  archivoCategoria = null;
+  pintarPreviaCategoria(categoriaEditando && categoriaEditando.imagen ? rutaImg(categoriaEditando.imagen) : '');
+});
+
+function limpiarFormCategoria(){
+  categoriaEditando = null;
+  archivoCategoria = null;
+  colorCategoriaElegido = COLORES_CATEGORIA[categoriasMant.length % COLORES_CATEGORIA.length];
+  document.getElementById('formNuevaCategoria').reset();
+  document.getElementById('categoriaNombre').closest('.campo').classList.remove('mal');
+  document.getElementById('tituloFormCategoria').textContent = 'Nueva categoría';
+  document.getElementById('textoBtnCategoria').textContent = 'Crear categoría';
+  document.getElementById('btnCancelarCategoria').hidden = true;
+  pintarColoresCategoria();
+  pintarPreviaCategoria('');
+}
+document.getElementById('btnCancelarCategoria').addEventListener('click', limpiarFormCategoria);
+
+function editarCategoria(c){
+  categoriaEditando = c;
+  archivoCategoria = null;
+  colorCategoriaElegido = (c.color || COLORES_CATEGORIA[0]).toUpperCase();
+  document.getElementById('categoriaNombre').value = c.nombre;
+  document.getElementById('tituloFormCategoria').textContent = 'Editar categoría';
+  document.getElementById('textoBtnCategoria').textContent = 'Guardar cambios';
+  document.getElementById('btnCancelarCategoria').hidden = false;
+  pintarColoresCategoria();
+  pintarPreviaCategoria(c.imagen ? rutaImg(c.imagen) : '');
+  document.getElementById('formNuevaCategoria').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.getElementById('categoriaNombre').focus();
+}
+
+async function cargarCategoriasMant(){
+  const caja = document.getElementById('listaCategoriasMant');
+  try {
+    const r = await api('/api/inventario/recursos/categorias');
+    categoriasMant = r.datos || [];
+    if (!categoriaEditando) {
+      colorCategoriaElegido = COLORES_CATEGORIA[categoriasMant.length % COLORES_CATEGORIA.length];
+      pintarColoresCategoria();
+      pintarPreviaCategoria();
+    }
+    if (!categoriasMant.length) {
+      caja.innerHTML = '<p class="vacio-mini">Todavía no hay categorías creadas.</p>';
+      return;
+    }
+    caja.innerHTML = categoriasMant.map(c => `
+      <div class="fila-cat-mant" style="--c:${escaparMant(c.color || '#3FB6E8')}">
+        <span class="cat-circulo">${ICONO_IMAGEN_CAT}${c.imagen ? `<img src="${escaparMant(rutaImg(c.imagen))}" alt="" onerror="this.remove()">` : ''}</span>
+        <span>
+          <strong>${escaparMant(c.nombre)}</strong>
+          <small>${c.total_tipos || 0} recurso${Number(c.total_tipos) === 1 ? '' : 's'} · ${Number(c.total_unidades || 0).toLocaleString('en-US')} unidades</small>
+        </span>
+        <span class="acciones-cat-mant">
+          <button type="button" data-accion="imagen" data-id="${c.id_categoria}" title="Cambiar imagen" aria-label="Cambiar imagen de ${escaparMant(c.nombre)}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7l1.4-2.5h5.2L16 7"/><circle cx="12" cy="13.5" r="3.4"/></svg>
+          </button>
+          <button type="button" data-accion="editar" data-id="${c.id_categoria}" title="Editar" aria-label="Editar ${escaparMant(c.nombre)}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>
+          </button>
+          <button type="button" class="peligro" data-accion="eliminar" data-id="${c.id_categoria}" title="Eliminar" aria-label="Eliminar ${escaparMant(c.nombre)}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+          </button>
+        </span>
+      </div>`).join('');
+
+    caja.querySelectorAll('[data-accion]').forEach(b => b.addEventListener('click', () => {
+      const c = categoriasMant.find(x => x.id_categoria === Number(b.dataset.id));
+      if (!c) return;
+      if (b.dataset.accion === 'editar') editarCategoria(c);
+      if (b.dataset.accion === 'imagen') cambiarImagenCategoriaMant(c);
+      if (b.dataset.accion === 'eliminar') {
+        confirmar('¿Eliminar esta categoría?', `"${c.nombre}" se quitará del inventario. Solo se puede si no tiene recursos.`, 'Eliminar', async () => {
+          try {
+            await api('/api/inventario/recursos/categorias/' + c.id_categoria, { method: 'DELETE' });
+            avisar('Categoría eliminada.');
+            if (categoriaEditando && categoriaEditando.id_categoria === c.id_categoria) limpiarFormCategoria();
+            cargarCategoriasMant();
+          } catch (error) {
+            avisar(error.message);
+          }
+        });
+      }
+    }));
+  } catch (error) {
+    caja.innerHTML = `<p class="vacio-mini">No se pudieron cargar las categorías: ${escaparMant(error.message)}</p>`;
+  }
+}
+
+function cambiarImagenCategoriaMant(c){
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/png,image/jpeg,image/webp,image/gif';
+  input.addEventListener('change', async () => {
+    const archivo = input.files[0];
+    if (!archivo) return;
+    try {
+      const formulario = new FormData();
+      formulario.append('imagen', archivo);
+      await api('/api/inventario/recursos/categorias/' + c.id_categoria + '/imagen', { method: 'PATCH', body: formulario, headers: {} });
+      avisar('Imagen de "' + c.nombre + '" actualizada.');
+      cargarCategoriasMant();
+    } catch (error) {
+      avisar(error.message);
+    }
+  });
+  input.click();
+}
+
+document.getElementById('formNuevaCategoria').addEventListener('submit', async e => {
+  e.preventDefault();
+  const campo = document.getElementById('categoriaNombre');
+  const nombre = campo.value.trim();
+  if (nombre.length < 2) { campo.closest('.campo').classList.add('mal'); campo.focus(); return; }
+  campo.closest('.campo').classList.remove('mal');
+
+  try {
+    const formulario = new FormData();
+    formulario.append('nombre', nombre);
+    formulario.append('color', colorCategoriaElegido);
+    if (archivoCategoria) formulario.append('imagen', archivoCategoria);
+
+    const r = categoriaEditando
+      ? await api('/api/inventario/recursos/categorias/' + categoriaEditando.id_categoria, { method: 'PUT', body: formulario, headers: {} })
+      : await api('/api/inventario/recursos/categorias', { method: 'POST', body: formulario, headers: {} });
+    avisar(r.mensaje || 'Categoría guardada.');
+    limpiarFormCategoria();
+    await cargarCategoriasMant();
+    limpiarFormCategoria();
+  } catch (error) {
+    avisar(error.message || 'No se pudo guardar la categoría.');
+  }
+});
+
 /* ---------- utilidades locales ---------- */
 function escaparMant(t){
   return String(t ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
@@ -670,3 +856,6 @@ cargarPermisosMant();
 cargarPuestosMant();
 cargarUnidadesMant();
 cargarEmpleadosParaUnidad();
+pintarColoresCategoria();
+pintarPreviaCategoria('');
+cargarCategoriasMant();

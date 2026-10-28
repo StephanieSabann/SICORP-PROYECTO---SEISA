@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nóminas — SICORP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/panel.css">
+  <link rel="stylesheet" href="css/nominas.css">
+  <script>document.documentElement.classList.add('js-anim');</script>
+</head>
+
+<body data-pagina="Nóminas">
+
+  <div class="app">
+
+    <!-- ==================== BARRA LATERAL ==================== -->
+    <aside class="sidebar">
+      <div class="marca">
+        <img src="img/logo.png" alt="SEISA">
+        <span class="sistema">SICORP—SEISA</span>
+      </div>
+
+      <nav class="menu">
+        <button class="menu-item" data-modulo="Empleados">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm7.5 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM9 12.8c-3 0-6 1.5-6 4.2V20h12v-3c0-2.7-3-4.2-6-4.2zm7.8.2c-.7 0-1.4.1-2 .3 1.3 1 2.2 2.3 2.2 3.9V20h4v-2.7c0-2.5-2.4-4.3-4.2-4.3z" />
+          </svg>
+          <span>Empleados</span>
+        </button>
+        <button class="menu-item" data-modulo="Inventario">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path
+              d="M14.7 6.3a3.6 3.6 0 0 1-4.7 4.7L4.5 16.5a1.7 1.7 0 0 0 2.4 2.4L12.4 13a3.6 3.6 0 0 1 4.7-4.7l-2.4-2z" />
+            <path d="M9.2 4.4L7.4 3l-2 .6-.6 2 1.4 1.8" />
+            <path d="M19.6 14.8l1.8 1.8-.6 2-2 .6-1.8-1.4" />
+          </svg>
+          <span>Inventario</span>
+        </button>
+        <button class="menu-item" data-modulo="Nóminas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round">
+            <rect x="4" y="3" width="13" height="18" rx="2" />
+            <path d="M17 7h3v11a3 3 0 0 1-3 3" />
+            <path d="M8 8h5M8 12h5M8 16h3" stroke-linecap="round" />
+          </svg>
+          <span>Nóminas</span>
+        </button>
+        <button class="menu-item" data-modulo="Reportes">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <rect x="3" y="13" width="4" height="8" rx="1" />
+            <rect x="10" y="8" width="4" height="13" rx="1" />
+            <rect x="17" y="3" width="4" height="18" rx="1" />
+          </svg>
+          <span>Reportes</span>
+        </button>
+        <button class="menu-item" data-modulo="Usuarios">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <circle cx="9" cy="8.5" r="3.4" />
+            <path d="M2.6 20c.8-3.4 3.4-5.3 6.4-5.3s5.6 1.9 6.4 5.3" />
+            <path d="M16.3 5.4a3.3 3.3 0 0 1 0 6.4M17.8 15c2 .8 3.3 2.5 3.6 5" />
+          </svg>
+          <span>Usuarios</span>
+        </button>
+      </nav>
+
+      <svg class="deco" viewBox="0 0 300 260" fill="none" aria-hidden="true">
+        <path d="M0 40h60l26-26h120" stroke="#8C99A6" stroke-width="2.4" opacity=".55" />
+        <path d="M0 78h74l26-26h150" stroke="#E3453F" stroke-width="2.4" />
+        <path d="M0 118h84l26-26h140" stroke="#E3453F" stroke-width="2.4" opacity=".85" />
+        <path d="M0 168h96l30 30h130" stroke="#2FA8DE" stroke-width="2.4" />
+        <path d="M0 208h110l30 30h120" stroke="#2FA8DE" stroke-width="2.4" opacity=".75" />
+        <path d="M0 240h124l26 26h110" stroke="#8C99A6" stroke-width="2.4" opacity=".45" />
+        <circle cx="206" cy="14" r="5" fill="#E3453F" />
+        <circle cx="250" cy="52" r="5" fill="#E3453F" />
+        <circle cx="256" cy="198" r="5" fill="#2FA8DE" />
+        <circle cx="260" cy="266" r="5" fill="#2FA8DE" />
+      </svg>
+    </aside>
+
+    <!-- ==================== ZONA DERECHA ==================== -->
+    <div class="lado">
+
+      <header class="topbar topbar-nom">
+        <label class="buscador" for="buscarGlobal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input type="search" id="buscarGlobal" placeholder="Buscar comprobantes en SICORP" autocomplete="off">
+        </label>
+        <div class="cuenta">
+          <span class="divisor"></span>
+          <svg class="avatar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <circle cx="12" cy="12" r="9.2" />
+            <circle cx="12" cy="10" r="3" />
+            <path d="M6.2 19a6 6 0 0 1 11.6 0" />
+          </svg>
+          <div class="quien">
+            <strong id="nombreUsuario">Jonathan</strong>
+            <small id="rolUsuario">Administrador</small>
+          </div>
+          <button class="chevron" id="btnCuenta" aria-expanded="false" aria-controls="menuCuenta"
+            aria-label="Abrir menú de la cuenta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M5 9l7 7 7-7" />
+            </svg>
+          </button>
+
+          <div class="menu-cuenta" id="menuCuenta" role="menu">
+            <button role="menuitem" data-ir="inicio">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round">
+                <path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z" />
+                <path d="M9.5 21v-6h5v6" />
+              </svg>
+              Inicio
+            </button>
+            <button role="menuitem" data-ir="cuenta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <circle cx="12" cy="8.5" r="3.6" />
+                <path d="M4.8 20c.9-3.7 3.8-5.7 7.2-5.7s6.3 2 7.2 5.7" />
+              </svg>
+              Cuenta
+            </button>
+            <button role="menuitem" data-ir="mantenimiento">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.5 3.5a4.5 4.5 0 0 0 5.9 5.9L21 9l-9.5 9.5a3 3 0 1 1-4.2-4.2L16 6l-1.5-2.5z" />
+                <path d="M6.5 17.5h.01" />
+              </svg>
+              Soporte y Mantenimiento
+            </button>
+            <button role="menuitem" id="btnSalir">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M14 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4" />
+                <path d="M10 8l4 4-4 4M14 12H3.5" />
+              </svg>
+              Salir
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="contenido contenido-nom">
+
+        <!-- Encabezado: migas, título, período y estado (ver pintarEncabezado en nominas.js) -->
+        <div class="encabezado-nom">
+          <div class="encabezado-nom-texto">
+            <p class="migas" id="migasNom"><button data-ir="inicio">Inicio</button> / <span class="actual">Nóminas</span></p>
+            <h1 id="tituloNom">Gestión de nóminas</h1>
+            <p class="sub" id="subNom">Selecciona el tipo de planilla que deseas preparar</p>
+          </div>
+          <div class="encabezado-nom-lado">
+            <div class="selector-periodo" id="selectorPeriodo">
+              <button type="button" class="btn-periodo" id="btnPeriodo" aria-haspopup="true" aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/><circle cx="16.5" cy="16" r="2.6"/><path d="M16.5 14.8v1.3l.9.6"/></svg>
+                <span id="textoPeriodo">—</span>
+                <svg class="flecha-abajo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg>
+              </button>
+              <div class="popover-periodo" id="popoverPeriodo" hidden>
+                <div class="anio-periodo">
+                  <button type="button" id="anioAnterior" aria-label="Año anterior">‹</button>
+                  <b id="anioPeriodo">2026</b>
+                  <button type="button" id="anioSiguiente" aria-label="Año siguiente">›</button>
+                </div>
+                <div class="meses-periodo" id="mesesPeriodo"></div>
+              </div>
+            </div>
+            <span class="estado-nom sin-iniciar" id="estadoNom">Sin iniciar</span>
+          </div>
+        </div>
+
+        <!-- ================= VISTA: TIPOS DE NÓMINA ================= -->
+        <section class="vista-nom" id="v-tipos">
+          <div class="titulo-tipos">
+            <h2>Seleccione el tipo de nómina</h2>
+            <p>Cada tipo utiliza reglas y pasos diferentes.</p>
+          </div>
+          <div class="rejilla-tipos" id="rejillaTipos"></div>
+          <div class="aviso-nom">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 7.5v6M12 16.5v.01"/></svg>
+            <span>El período seleccionado (<b id="periodoAviso">—</b>) se aplicará al proceso elegido.</span>
+          </div>
+
+          <div class="tarjeta-nom borradores-nom" id="cajaBorradores" hidden>
+            <div class="cabecera-borradores">
+              <h3>Nóminas en preparación</h3>
+              <div class="acciones-cabecera-borradores">
+                <button type="button" class="btn-borrar-todos" id="btnBorrarTodos" title="Descartar todas las nóminas en preparación">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+                  Borrar todos
+                </button>
+                <button type="button" class="enlace-nom" data-ir-historial>Ver historial de comprobantes →</button>
+              </div>
+            </div>
+            <div id="listaBorradores"></div>
+          </div>
+          <p class="pie-tipos" id="pieHistorial"><button type="button" class="enlace-nom" data-ir-historial>Ver historial de comprobantes →</button></p>
+        </section>
+
+        <!-- ================= VISTA: PROCESO (pasos) ================= -->
+        <section class="vista-nom" id="v-proceso" hidden>
+          <ol class="stepper" id="stepper"></ol>
+          <div id="contenidoPaso"></div>
+        </section>
+
+        <!-- ================= VISTA: HISTORIAL ================= -->
+        <section class="vista-nom" id="v-historial" hidden>
+          <div class="tarjeta-nom">
+            <div class="filtros-historial">
+              <label class="campo-busca">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                <input type="search" id="hTexto" placeholder="Buscar por empleado o No. de recibo..." autocomplete="off">
+              </label>
+              <select id="hEmpleado" aria-label="Filtrar por empleado"><option value="">Todos los empleados</option></select>
+              <input type="month" id="hPeriodo" aria-label="Filtrar por período">
+              <select id="hTipo" aria-label="Filtrar por tipo"><option value="">Todos los tipos</option></select>
+              <select id="hEstado" aria-label="Filtrar por estado">
+                <option value="">Todos los estados</option>
+                <option value="APROBADA">Nómina aprobada</option>
+                <option value="PENDIENTE_APROBACION">Pendiente de aprobación</option>
+                <option value="EN_PREPARACION">En preparación</option>
+              </select>
+            </div>
+            <div class="tabla-nom tabla-historial-nom">
+              <div class="fila-nom encabezado">
+                <span>Recibo No.</span><span>Fecha</span><span>Empleado</span><span>Tipo</span><span>Período</span><span>Estado</span><span class="der">Total</span><span class="der">Acciones</span>
+              </div>
+              <div id="listaHistorialNom"></div>
+            </div>
+            <p class="vacio" id="sinHistorialNom" hidden>No hay registros que coincidan con los filtros.</p>
+          </div>
+          <div class="pie-pasos">
+            <button type="button" class="btn-nom-linea" id="btnHistorialVolver">← Volver a tipos de nómina</button>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CARGAR ARCHIVO EEGSA ==================== -->
+  <div class="fondo-modal" id="modalCargar" role="dialog" aria-modal="true" aria-labelledby="tituloCargar">
+    <div class="modal modal-nom modal-cargar">
+      <div class="cabecera-modal-nom">
+        <svg class="nube" viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 38H14a11 11 0 0 1-1.6-21.9A15 15 0 0 1 41.5 11 11.5 11.5 0 0 1 50 38h-4"/><path d="M32 44V23M25 30l7-7 7 7"/></svg>
+        <div>
+          <h3 id="tituloCargar">Cargar archivo EEGSA</h3>
+          <p>Selecciona el archivo de producción correspondiente al período</p>
+        </div>
+      </div>
+      <div class="periodo-modal">
+        <span>Período de nómina</span>
+        <b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M8 2.5v4M16 2.5v4M3 9.5h18"/></svg><span id="periodoModalCargar">—</span></b>
+      </div>
+      <label class="zona-excel" id="zonaExcel" for="inputExcel">
+        <svg class="icono-excel" viewBox="0 0 40 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M4 3h22l10 10v32H4z"/><path d="M26 3v10h10"/><path d="M13 23l14 15M27 23L13 38" stroke-linecap="round"/></svg>
+        <b id="textoZonaExcel">Arrastra el archivo de EEGSA aquí</b>
+        <small id="subZonaExcel">o selecciona el archivo desde tu equipo</small>
+        <span class="btn-seleccionar">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          Seleccionar archivo
+        </span>
+        <em>Formatos permitidos: .xlsx y .xls &nbsp;|&nbsp; Tamaño máximo: 10 MB</em>
+      </label>
+      <input type="file" id="inputExcel" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>
+      <p class="error-modal" id="errorCargar" hidden></p>
+      <div class="aviso-modal-nom">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5L1.5 21h21z"/><path d="M12 9v5.5M12 17.2v.01" stroke="#0B121B" stroke-width="2.2" stroke-linecap="round"/></svg>
+        <span>El archivo se va a validar antes de importar los datos a la nómina</span>
+      </div>
+      <div class="acciones-modal-nom">
+        <button type="button" class="btn-nom-linea" id="btnCerrarCargar">Cancelar</button>
+        <button type="button" class="btn-nom-rojo" id="btnContinuarCargar" disabled>Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CANCELAR IMPORTACIÓN ==================== -->
+  <div class="fondo-modal" id="modalCancelarImportacion" role="dialog" aria-modal="true" aria-labelledby="tituloCancelarImp">
+    <div class="modal modal-nom">
+      <span class="icono-alerta-roja" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5L2.5 20h19z"/><path d="M12 10v4.5M12 17v.01"/></svg>
+      </span>
+      <h3 id="tituloCancelarImp">¿Cancelar la importación?</h3>
+      <p class="texto-modal-nom">Se perderá el archivo cargado y el progreso de esta importación.</p>
+      <div class="ficha-archivo" id="fichaCancelar"></div>
+      <div class="aviso-amarillo">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5L1.5 21h21z"/><path d="M12 9v5.5M12 17.2v.01" stroke="#1a1408" stroke-width="2.2" stroke-linecap="round"/></svg>
+        <span>Esta acción eliminará únicamente esta importación.<br>Las nóminas anteriores no serán afectadas.</span>
+      </div>
+      <p class="texto-modal-nom">Si deseas conservar el archivo, vuelve y continúa con la validación</p>
+      <div class="acciones-modal-nom">
+        <button type="button" class="btn-nom-linea" id="btnSeguirImportacion">Continuar importación</button>
+        <button type="button" class="btn-nom-rojo" id="btnSiCancelarImportacion">Sí, cancelar importación</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: CONFIRMAR APROBACIÓN ==================== -->
+  <div class="fondo-modal" id="modalAprobar" role="dialog" aria-modal="true" aria-labelledby="tituloAprobar">
+    <div class="modal modal-nom">
+      <span class="icono-escudo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.4-3 7.8-7 9-4-1.2-7-4.6-7-9V6z"/><path d="M8.8 12.2l2.2 2.2 4.4-4.6"/></svg>
+      </span>
+      <h3 id="tituloAprobar">¿Aprobar la nómina?</h3>
+      <p class="texto-modal-nom" id="textoAprobar"></p>
+      <ul class="lista-aprobar">
+        <li>Los valores quedarán <b>bloqueados</b> y ya no se podrán editar.</li>
+        <li>Se generará el <b>comprobante de pago</b> con número de recibo.</li>
+        <li>La aprobación quedará registrada con tu usuario, fecha y hora.</li>
+      </ul>
+      <div class="total-aprobar"><span>Total a recibir</span><b id="totalAprobar">Q 0.00</b></div>
+      <div class="acciones-modal-nom">
+        <button type="button" class="btn-nom-linea" id="btnNoAprobar">Cancelar</button>
+        <button type="button" class="btn-nom-rojo" id="btnSiAprobar">Sí, aprobar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: DETALLE COMPLETO ==================== -->
+  <div class="fondo-modal" id="modalDetalle" role="dialog" aria-modal="true" aria-labelledby="tituloDetalle">
+    <div class="modal modal-nom modal-detalle">
+      <div class="cabecera-detalle">
+        <h3 id="tituloDetalle">Detalle completo de la nómina</h3>
+        <button type="button" class="cerrar-modal" data-cerrar="modalDetalle" aria-label="Cerrar">✕</button>
+      </div>
+      <div id="cuerpoDetalle" class="cuerpo-detalle"></div>
+      <div class="acciones-modal-nom"><button type="button" class="btn-nom-linea" data-cerrar="modalDetalle">Cerrar</button></div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: COMPROBANTE DESCARGADO ==================== -->
+  <div class="fondo-modal" id="modalDescargado" role="dialog" aria-modal="true" aria-labelledby="tituloDescargado">
+    <div class="modal modal-nom">
+      <svg class="visto" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <circle cx="60" cy="60" r="46" stroke="#18BE2D" stroke-width="6" />
+        <path d="M38 61l16 16 30-32" stroke="#18BE2D" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <h3 id="tituloDescargado">Comprobante descargado correctamente</h3>
+      <p class="texto-modal-nom" id="textoDescargado"></p>
+      <div class="chip-pdf">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 2h9l5 5v15H6z" opacity=".9"/><path d="M15 2v5h5" fill="#0B121B"/><text x="8" y="18" font-size="5.5" font-family="Arial" font-weight="700" fill="#0B121B">PDF</text></svg>
+        <span id="nombreDescargado"></span>
+      </div>
+      <div class="acciones-modal-nom"><button type="button" class="btn-nom-rojo" data-cerrar="modalDescargado">Aceptar</button></div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: VISTA PREVIA DE IMPRESIÓN ==================== -->
+  <div class="fondo-modal" id="modalImprimir" role="dialog" aria-modal="true" aria-labelledby="tituloImprimir">
+    <div class="modal modal-nom modal-imprimir">
+      <p class="titulo-imprimir" id="tituloImprimir">Vista previa de la impresión</p>
+      <div class="cuerpo-imprimir">
+        <div class="hoja-previa" id="hojaPrevia"></div>
+        <aside class="opciones-imprimir">
+          <div><span>Impresora</span><b>La eliges en el diálogo de tu sistema</b></div>
+          <div><span>Copias</span><b>Configurable al imprimir</b></div>
+          <div><span>Papel</span><b>A4</b></div>
+          <div><span>Orientación</span><b>Vertical</b></div>
+          <p>Al presionar <b>Imprimir</b> se abre el diálogo de impresión del navegador para que escojas cualquier impresora disponible o "Guardar como PDF".</p>
+          <div class="acciones-modal-nom">
+            <button type="button" class="btn-nom-linea" data-cerrar="modalImprimir">Cancelar</button>
+            <button type="button" class="btn-nom-rojo" id="btnImprimirAhora">Imprimir</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lo que realmente se imprime (solo visible en @media print) -->
+  <div id="areaImpresion" aria-hidden="true"></div>
+
+  <!-- ==================== MODAL: CONFIRMAR (genérico, de comun.js) ==================== -->
+  <div class="fondo-modal" id="modalConfirmar" role="dialog" aria-modal="true" aria-labelledby="tituloConfirmar">
+    <div class="modal">
+      <svg class="visto alerta" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+        <circle cx="60" cy="60" r="46" stroke="#E3453F" stroke-width="6" />
+        <path d="M60 36v34" stroke="#E3453F" stroke-width="8" stroke-linecap="round" />
+        <circle cx="60" cy="84" r="5" fill="#E3453F" />
+      </svg>
+      <h3 id="tituloConfirmar">¿Confirmar?</h3>
+      <p id="textoConfirmar">Esta acción no se puede deshacer.</p>
+      <div class="acciones-modal">
+        <button class="btn-linea" id="btnNo">Cancelar</button>
+        <button class="btn-rojo" id="btnSi">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="aviso" id="aviso" role="status"></div>
+  <script src="js/comun.js"></script>
+  <script src="js/nominas-calculo.js"></script>
+  <script src="js/nominas.js"></script>
+</body>
+
+</html>

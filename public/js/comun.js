@@ -12,9 +12,9 @@ const sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const PAGINAS = {
   'Empleados': 'empleados.html',
   'Usuarios': 'usuarios.html',
-  'Inventario': null,
-  'Nóminas': null,
-  'Reportes': null
+  'Inventario': 'inventario.html',
+  'Nóminas': 'nominas.html',
+  'Reportes': 'reportes.html'
 };
 
 document.querySelectorAll('[data-modulo]').forEach(el => {
@@ -64,8 +64,8 @@ async function cargarSesion(){
    esconde si YA sabemos que existe como acceso y esta persona no lo
    tiene. */
 function aplicarAccesos(accesos){
-  const normalizado = accesos.map(a => a.toLowerCase().trim());
-  const tieneAcceso = nombreModulo => normalizado.includes(nombreModulo.toLowerCase());
+  const normalizado = accesos.map(sinAcentos);
+  const tieneAcceso = nombreModulo => normalizado.includes(sinAcentos(nombreModulo));
 
   document.querySelectorAll('[data-modulo]').forEach(el => {
     const modulo = el.dataset.modulo;
@@ -85,7 +85,14 @@ function aplicarAccesos(accesos){
 /* Los módulos que SÍ esperamos controlar por rol. Empleados y
    Usuarios ya están conectados a permisos reales; los demás se
    agregan aquí en cuanto tengan su propio acceso en el catálogo. */
-const MODULOS_CON_CONTROL = ['Empleados', 'Usuarios'];
+const MODULOS_CON_CONTROL = ['Empleados', 'Usuarios', 'Inventario', 'Nóminas', 'Reportes'];
+
+/* "Nóminas" y "Nominas" cuentan como el mismo acceso. */
+function sinAcentos(t){
+  const limpio = String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  /* Alias: "Nomina" = "Nominas", "Reporte" = "Reportes" */
+  return limpio === 'nomina' ? 'nominas' : limpio === 'reporte' ? 'reportes' : limpio;
+}
 
 /* Mantenimiento no es un "módulo" del catálogo de accesos — se
    protege con el mismo acceso que ya exige el backend para
@@ -101,8 +108,8 @@ function verificarAccesoPaginaActual(accesos){
   const accesoRequerido = PAGINA_A_ACCESO_REQUERIDO[pagina] || pagina;
   if (!pagina || (!MODULOS_CON_CONTROL.includes(pagina) && !PAGINA_A_ACCESO_REQUERIDO[pagina])) return;
 
-  const normalizado = accesos.map(a => a.toLowerCase().trim());
-  if (!normalizado.includes(accesoRequerido.toLowerCase())) {
+  const normalizado = accesos.map(sinAcentos);
+  if (!normalizado.includes(sinAcentos(accesoRequerido))) {
     window.location.href = 'inicio.html?sinacceso=' + encodeURIComponent(pagina);
   }
 }
