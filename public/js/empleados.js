@@ -43,6 +43,129 @@ async function api(url, metodo = 'GET', cuerpo = null) {
   return datos;
 }
 
+/* ============================================================
+   Catálogos: Puestos y Unidades
+   ------------------------------------------------------------
+   Antes el campo "Puesto" era una caja de texto libre y el de
+   "Unidad" también: lo que se escribía ahí NO se mandaba al
+   servidor y se perdía. Ahora los dos son listas que se llenan
+   desde la base (/api/puestos y /api/unidades) y lo que se
+   guarda es el id, que es lo que esperan las tablas Empleado
+   (id_puesto) y Unidad_empleado (id_unidad).
+   ============================================================ */
+let puestos = [];
+let unidades = [];
+
+function opcionesDe(lista, valorVacio) {
+  return `<option value="">${valorVacio}</option>` + lista.map(x =>
+    `<option value="${x.valor}">${escapar(x.texto)}</option>`).join('');
+}
+
+function llenarSelectsCatalogo(){
+  const opcPuestos = opcionesDe(
+    puestos.map(p => ({ valor: p.id_puesto, texto: p.nombre })),
+    'Selecciona el puesto'
+  );
+
+  ['fPuesto', 'dPuesto'].forEach(id => {
+    const select = document.getElementById(id);
+    if (select) select.innerHTML = opcPuestos;
+  });
+
+  /* La unidad es una caja de texto con sugerencias (<datalist>), no
+     una lista cerrada: se puede escoger una de las que ya existen o
+     escribir una nueva, y el servidor la crea si no está.
+     Solo se sugieren las activas; las dadas de baja no se proponen,
+     pero si el empleado ya pertenece a una, su código se sigue
+     mostrando porque es texto libre. */
+  const lista = document.getElementById('listaUnidades');
+  if (lista) {
+    lista.innerHTML = unidades
+      .filter(u => u.es_activa && u.codigo)
+      .map(u => `<option value="${escapar(u.codigo)}"></option>`)
+      .join('');
+  }
+}
+
+/* ============================================================
+   Código de unidad: formato obligatorio SI-01 ... SI-99
+   ------------------------------------------------------------
+   Mismas reglas que en el servidor (controlador/empleados.
+   controller.js). Aquí se aplica mientras se escribe, para que
+   la persona vea de una vez cómo va a quedar guardado y no
+   tenga que esperar a que el servidor la regañe.
+
+   Se puede escribir 21, si21, SI 21 o SI-21: todo queda SI-21.
+   Escribir 1 queda SI-01.
+   Devuelve el código ya formateado, o null si no es válido.
+   ============================================================ */
+function normalizarUnidad(texto){
+  const limpio = String(texto || '').replace(/\s+/g, '').toUpperCase();
+  if (!limpio) return '';
+
+  const partes = /^\d{1,2}$/.test(limpio) ? [null, limpio] : limpio.match(/^SI-?(\d{1,2})$/);
+  if (!partes) return null;
+
+  const numero = Number(partes[1]);
+  if (numero < 1) return null;
+
+  return 'SI-' + String(numero).padStart(2, '0');
+}
+
+/* Al salir del campo se acomoda solo a SI-NN. Si lo que escribieron
+   no sirve, se marca en rojo en vez de dejarlo pasar y que el
+   servidor lo rechace después. */
+function conectarCampoUnidad(id){
+  const campo = document.getElementById(id);
+  if (!campo) return;
+
+  campo.addEventListener('blur', () => {
+    const normalizado = normalizarUnidad(campo.value);
+    if (normalizado === null) {
+      campo.classList.add('unidad-mala');
+      campo.title = 'El código debe ser SI- y un número del 1 al 99. Por ejemplo: SI-01';
+      return;
+    }
+    campo.classList.remove('unidad-mala');
+    campo.title = '';
+    campo.value = normalizado;
+  });
+
+  campo.addEventListener('input', () => campo.classList.remove('unidad-mala'));
+}
+
+/* Si el empleado tiene una unidad o un puesto que ya no está en la
+   lista (por ejemplo una unidad dada de baja), se agrega como opción
+   para que el select pueda mostrar su valor actual y no se pierda
+   al guardar. */
+function asegurarOpcion(idSelect, valor, texto){
+  const select = document.getElementById(idSelect);
+  if (!select || valor === null || valor === undefined || valor === '') return;
+  if (select.querySelector(`option[value="${valor}"]`)) return;
+  select.insertAdjacentHTML('beforeend',
+    `<option value="${valor}">${escapar(texto || valor)}</option>`);
+}
+
+async function cargarCatalogos(){
+  try {
+    const [resPuestos, resUnidades] = await Promise.all([
+      api('/api/puestos'),
+      api('/api/unidades')
+    ]);
+
+    puestos = (resPuestos && resPuestos.datos) || [];
+    unidades = (resUnidades && resUnidades.datos) || [];
+    llenarSelectsCatalogo();
+
+    if (puestos.length === 0) {
+      avisar('No hay puestos registrados. Agrégalos en Mantenimiento → Empleados → Puestos.');
+    }
+  } catch (error) {
+    console.error('No se pudieron cargar los catálogos de puestos y unidades:', error);
+    avisar('No se pudieron cargar los puestos y las unidades: ' + error.message);
+  }
+}
+
 /* ---------------- Cargar Datos desde la API ---------------- */
 /* BACKEND: Reemplaza tu cargarTodos() actual */
 /* Tipos de empleado. Los técnicos se dividen en socio / no socio (lo usa
@@ -82,6 +205,18 @@ async function cargarTodos() {
       ...tipoDeEmpleado(e),
       salario: e.salario_base !== null && e.salario_base !== undefined ? Number(e.salario_base).toFixed(2) : '',
       nacimiento: e.fecha_nacimiento ? e.fecha_nacimiento.split('T')[0] : '',
+      /* Estas cuatro llaves FALTABAN. La pantalla ya leía e.puesto y
+         e.unidad en la lista, en el expediente y en el Excel, pero
+         aquí nunca se creaban, así que siempre valían undefined: el
+         puesto salía vacío y todos aparecían como "Sin unidad".
+         Peor aún: al abrir a alguien para editarlo, el campo Puesto
+         quedaba vacío, la validación lo marcaba como incompleto y el
+         formulario se salía antes de llamar a la API — por eso no se
+         guardaba el salario ni ningún otro cambio. */
+      id_puesto: e.id_puesto ?? null,
+      puesto: e.puesto || '',
+      id_unidad: e.id_unidad ?? null,
+      unidad: e.unidad || '',
     }));
 
     llenarUnidades();
@@ -203,6 +338,10 @@ function pintarTarjetas(lista){
       </div>
       <div class="linea-dato">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3.5" y="7" width="17" height="13" rx="1.6"/><path d="M8.5 7V5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v2"/></svg>
+        <span>${escapar(e.puesto || 'Sin puesto')}</span>
+      </div>
+      <div class="linea-dato">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4h6v6H4zM14 14h6v6h-6z"/><path d="M10 7h5a3 3 0 0 1 3 3v4"/></svg>
         <span>${escapar(e.unidad || 'Sin unidad')}</span>
       </div>
       <div class="pie-emp">
@@ -266,53 +405,63 @@ function conectarAccionesTarjeta(el, codigo){
    de la tarjeta ni de la tabla, y se abre hacia arriba solo si no
    cabe hacia abajo. */
 /* ============================================================
-   Menú de "⋮" de cada tarjeta/fila: activar-desactivar y eliminar.
+   Menú de "⋮" de cada tarjeta/fila: dar de baja y reactivar.
+   ------------------------------------------------------------
+   Antes aquí había DOS opciones, "Desactivar" y "Eliminar
+   empleado", y las dos mandaban exactamente lo mismo
+   (activo: false). O sea que hacían lo mismo con nombres
+   distintos, y uno de esos nombres ademas mentía: el sistema
+   NUNCA borra un empleado de la base.
+
+   Por qué no se borra: si se eliminara la fila, se perderían
+   también sus planillas pagadas, sus permisos y su historial.
+   En un sistema de nóminas eso es un problema contable, no
+   solo técnico. Por eso se usa baja lógica: el empleado se
+   marca como inactivo (activo = 0), desaparece de los listados
+   y deja de salir en las planillas nuevas, pero su rastro
+   completo se conserva.
+
+   Ahora hay UNA sola opción que dice lo que de verdad hace, y
+   pide confirmación antes de dar de baja.
    ============================================================ */
 function abrirMenuEmpleado(boton, codigo) {
   const emp = empleados.find(e => e.codigo === codigo); // Buscar al empleado en el estado actual
   if (!emp) return;
 
-  abrirMenuAcciones(boton, [
-    {
-      // Botón 1: Activar / Desactivar
-      texto: emp.estado === 'activo' ? 'Desactivar' : 'Activar',
-      accion: async () => {
-        const nuevoEstado = emp.estado === 'activo' ? false : true;
-        try {
-          // Llamada a la API para actualizar el estado
-          await api(`/api/empleados/${codigo}`, 'PATCH', { activo: nuevoEstado });
-          
-          // Refrescar los datos desde el backend
-          await cargarTodos();
-          avisar(emp.nombre + (nuevoEstado ? ' quedó activo.' : ' quedó inactivo.'));
-        } catch (error) {
-          console.error('Error al cambiar estado:', error);
-          avisar('No se pudo cambiar el estado del empleado.');
-        }
-      }
-    },
-    {
-      // Botón 2: Borrado Lógico (Eliminar)
-      texto: 'Eliminar empleado', peligro: true, // Se mantiene el estilo de peligro[cite: 1]
-      accion: () => confirmar(
-        '¿Eliminar a ' + emp.nombre + '?',
-        'El empleado será dado de baja del sistema (borrado lógico).', // Texto adaptado
-        'Eliminar',
-        async () => {
-          try {
-            // Borrado lógico enviando activo: false
-            await api(`/api/empleados/${codigo}`, 'PATCH', { activo: false }); 
-            
-            // Refrescar la tabla con los datos reales
-            await cargarTodos();
-            avisar(emp.nombre + ' fue eliminado correctamente.');
-          } catch (error) {
-            console.error('Error al eliminar:', error);
-            avisar('No se pudo eliminar al empleado.');
-          }
-        }
-      )
+  const estaActivo = emp.estado === 'activo';
+
+  /* Cambia el estado del empleado y refresca la lista */
+  const cambiarEstado = async nuevoEstado => {
+    try {
+      await api(`/api/empleados/${codigo}`, 'PATCH', { activo: nuevoEstado });
+      await cargarTodos();
+      avisar(emp.nombre + (nuevoEstado
+        ? ' quedó activo otra vez.'
+        : ' quedó dado de baja. Su expediente y su historial se conservan.'));
+    } catch (error) {
+      console.error('Error al cambiar el estado del empleado:', error);
+      avisar(error.message || 'No se pudo cambiar el estado del empleado.');
     }
+  };
+
+  abrirMenuAcciones(boton, [
+    estaActivo
+      ? {
+          texto: 'Dar de baja',
+          peligro: true,
+          accion: () => confirmar(
+            '¿Dar de baja a ' + emp.nombre + '?',
+            'Dejará de aparecer en los listados y en las planillas nuevas. ' +
+            'Su expediente, su historial y sus planillas anteriores se conservan, ' +
+            'y lo puedes reactivar cuando quieras.',
+            'Dar de baja',
+            () => cambiarEstado(false)
+          )
+        }
+      : {
+          texto: 'Reactivar',
+          accion: () => cambiarEstado(true)
+        }
   ]);
 }
 /* El buscador usa "input" (se actualiza mientras escribes).
@@ -402,10 +551,20 @@ document.querySelectorAll('#segmentadoTipo [data-tipo]').forEach(b => {
   b.addEventListener('click', () => {
     tipoSeleccionado = b.dataset.tipo;
     document.querySelectorAll('#segmentadoTipo [data-tipo]').forEach(x => x.classList.toggle('is-on', x === b));
-    fCampos.unidad.closest('.campo').style.opacity = tipoSeleccionado === 'ADMINISTRATIVO' ? '.5' : '1';
+    aplicarUnidadSegunTipo();
     document.getElementById('errorTipo').hidden = true;
   });
 });
+
+/* Un administrativo no pertenece a ninguna cuadrilla, así que el
+   select se apaga y se limpia (antes solo se le bajaba la opacidad,
+   pero se podía seguir escogiendo una unidad). */
+function aplicarUnidadSegunTipo(){
+  const esAdministrativo = tipoSeleccionado === 'ADMINISTRATIVO';
+  fCampos.unidad.disabled = esAdministrativo;
+  fCampos.unidad.closest('.campo').style.opacity = esAdministrativo ? '.5' : '1';
+  if (esAdministrativo) fCampos.unidad.value = '';
+}
 
 document.getElementById('btnNuevoEmpleado').addEventListener('click', () => abrirFormularioEmpleado(null));
 document.getElementById('btnCancelarEmpleado').addEventListener('click', () => {
@@ -461,12 +620,23 @@ function abrirFormularioEmpleado(emp){
     fCampos.telefono.value = emp.telefono;
     fCampos.correo.value = emp.correo || '';
     fCampos.direccion.value = emp.direccion || '';
-    fCampos.puesto.value = emp.puesto || '';
+    /* Los selects se llenan con el id, no con el texto. Y se asegura
+       que la opción exista (puede ser un puesto o una unidad que ya
+       se dio de baja) para que no se borre sola al guardar. */
+    asegurarOpcion('fPuesto', emp.id_puesto, emp.puesto);
+    fCampos.puesto.value = emp.id_puesto || '';
     fCampos.ingreso.value = emp.ingreso || '';
     fCampos.salario.value = emp.salario || '';
+    /* La unidad es texto: se muestra el código tal cual */
     fCampos.unidad.value = emp.unidad || '';
     fCampos.nacimiento.value = emp.nacimiento;
+  } else {
+    fCampos.puesto.value = '';
+    fCampos.unidad.value = '';
   }
+
+  /* Los administrativos no llevan unidad */
+  aplicarUnidadSegunTipo();
   irA('nuevo');
   fCampos.nombre.focus();
 }
@@ -478,7 +648,9 @@ function reglasEmpleado(){
     fNacimiento: !!fCampos.nacimiento.value,
     fTelefono: fCampos.telefono.value.replace(/\D/g,'').length === 8,
     fDireccion: fCampos.direccion.value.trim().length >= 5,
-    fPuesto: fCampos.puesto.value.trim().length >= 2,
+    /* Antes se pedía texto de 2 letras o más. Ahora es una lista, así
+       que basta con que haya una opción escogida. */
+    fPuesto: !!fCampos.puesto.value,
     fIngreso: !!fCampos.ingreso.value,
     fSalario: Number(fCampos.salario.value) > 0
   };
@@ -523,10 +695,26 @@ formEmpleado.addEventListener('submit', async e => { // Agregamos 'async'
   const nombreDB = partesNombre[0] || '';
   const apellidoDB = partesNombre.slice(1).join(' ') || '';
 
+  /* La unidad tiene que cumplir el formato SI-NN antes de mandarla */
+  const unidadFormulario = normalizarUnidad(fCampos.unidad.value);
+  if (unidadFormulario === null) {
+    avisar('El código de unidad debe ser SI- y un número del 1 al 99. Por ejemplo: SI-01');
+    fCampos.unidad.classList.add('unidad-mala');
+    fCampos.unidad.focus();
+    return;
+  }
+
   // 2. Preparar el objeto con los datos que espera tu SQL
   const valorNit = fCampos.nit.value.trim();
   const datosDB = {
-  id_puesto: PUESTO_POR_TIPO[tipoSeleccionado], // Se envía como número entero positivo
+  /* Antes aquí se mandaba PUESTO_POR_TIPO[tipo], o sea el puesto
+     deducido del tipo de empleado, y el puesto que la persona
+     escogía se tiraba a la basura. Ahora se manda el que escogió. */
+  id_puesto: Number(fCampos.puesto.value),
+  /* La unidad nunca se mandaba: por eso no se guardaba. Se manda el
+     código ya con formato SI-NN; el servidor busca esa unidad y la
+     crea si no existe. Vacío = sin unidad (los administrativos). */
+  unidad_codigo: unidadFormulario,
   tipo_empleado: tipoSeleccionado,
   salario_base: Number(fCampos.salario.value) || 0,
   nombre: nombreDB,
@@ -559,7 +747,8 @@ formEmpleado.addEventListener('submit', async e => { // Agregamos 'async'
       : 'El expediente se creó y ya está disponible en el directorio.';
     
     document.getElementById('okNombre').textContent = fCampos.nombre.value.trim();
-    document.getElementById('okDatos').textContent = TIPOS_EMPLEADO[tipoSeleccionado] + ' • ' + (fCampos.puesto.value.trim() || 'Sin puesto');
+    const textoPuesto = fCampos.puesto.selectedOptions[0] ? fCampos.puesto.selectedOptions[0].textContent : '';
+    document.getElementById('okDatos').textContent = TIPOS_EMPLEADO[tipoSeleccionado] + ' • ' + (textoPuesto || 'Sin puesto');
 
     // Limpiar formulario y cerrar[cite: 1]
     formEmpleado.reset();
@@ -622,7 +811,10 @@ function abrirExpediente(codigo, editar){
   document.getElementById('dNacimiento').value = emp.nacimiento || '';
   document.getElementById('dDireccion').value = emp.direccion || '';
   document.getElementById('dIngreso').value = emp.ingreso || '';
-  document.getElementById('dPuesto').value = emp.puesto || '';
+  /* dPuesto y dUnidad ahora son listas: se les pone el id, no el
+     texto, y se garantiza que la opción exista. */
+  asegurarOpcion('dPuesto', emp.id_puesto, emp.puesto);
+  document.getElementById('dPuesto').value = emp.id_puesto || '';
   document.getElementById('dSalario').value = emp.salario || '';
   document.getElementById('dUnidad').value = emp.unidad || '';
 
@@ -650,20 +842,72 @@ function abrirExpediente(codigo, editar){
     caja.innerHTML = html;
   }
 
-  /* Actividad reciente: se arma con lo que hay en el expediente */
-  const act = document.getElementById('cajaActividad');
-  const eventos = [];
-  if (emp.unidad) eventos.push({ texto: 'Asignado a ' + emp.unidad, fecha: emp.ingreso });
-  eventos.push({ texto: 'Expediente creado', fecha: emp.ingreso });
-  act.innerHTML = eventos.map(ev => `
-    <div class="evento">
-      <span class="aro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 7v5l3.2 2"/></svg></span>
-      <div>${escapar(ev.texto)}<small>${fechaBonita(ev.fecha)}</small></div>
-    </div>`).join('');
+  /* Actividad reciente: ahora es el historial REAL que viene de la
+     tabla Empleado_historial, no eventos inventados a partir de la
+     fecha de ingreso como antes. */
+  pintarHistorial(emp.codigo);
 
   modoEdicionExp(!!editar);
   pintarPermisos();
   irAExpediente();
+}
+
+/* ============================================================
+   Historial del empleado
+   ------------------------------------------------------------
+   Lee /api/empleados/:codigo/historial y lo pinta en el bloque
+   de "Actividad reciente" del expediente. Cada renglón dice qué
+   campo cambió, de qué valor a qué valor, quién lo hizo y
+   cuándo.
+   ============================================================ */
+function fechaYHora(iso){
+  if (!iso) return '—';
+  const texto = String(iso);
+  const hora = texto.slice(11, 16);
+  return fechaBonita(texto) + (hora ? ' · ' + hora : '');
+}
+
+function textoDelMovimiento(h){
+  const campo = h.campo || 'Cambio';
+
+  if (h.accion === 'CREACION') {
+    return h.valor_nuevo
+      ? `${escapar(campo)}: <b>${escapar(h.valor_nuevo)}</b>`
+      : escapar(campo);
+  }
+
+  const antes = h.valor_anterior ? escapar(h.valor_anterior) : '(vacío)';
+  const despues = h.valor_nuevo ? escapar(h.valor_nuevo) : '(vacío)';
+
+  return `${escapar(campo)}: ${antes} → <b>${despues}</b>`;
+}
+
+async function pintarHistorial(codigo){
+  const caja = document.getElementById('cajaActividad');
+  if (!caja) return;
+
+  caja.innerHTML = '<div class="evento"><div>Cargando historial…</div></div>';
+
+  try {
+    const respuesta = await api('/api/empleados/' + codigo + '/historial');
+    const historial = (respuesta && respuesta.datos) || [];
+
+    if (historial.length === 0) {
+      caja.innerHTML = '<div class="evento"><div>Todavía no hay movimientos registrados.' +
+        '<small>Los cambios que se hagan de ahora en adelante quedarán aquí.</small></div></div>';
+      return;
+    }
+
+    caja.innerHTML = historial.map(h => `
+      <div class="evento">
+        <span class="aro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 7v5l3.2 2"/></svg></span>
+        <div>${textoDelMovimiento(h)}<small>${fechaYHora(h.fecha)}${h.usuario ? ' · ' + escapar(h.usuario) : ''}</small></div>
+      </div>`).join('');
+  } catch (error) {
+    console.error('No se pudo cargar el historial:', error);
+    caja.innerHTML = '<div class="evento"><div>No se pudo cargar el historial.' +
+      `<small>${escapar(error.message || '')}</small></div></div>`;
+  }
 }
 
 function irAExpediente(){
@@ -675,7 +919,15 @@ function irAExpediente(){
 
 function modoEdicionExp(activo){
   document.getElementById('cajaExpediente').classList.toggle('editando', activo);
-  camposExp.forEach(id => document.getElementById(id).readOnly = !activo);
+  /* Puesto y Unidad ya son <select>, y en un select "readOnly" no
+     existe: hay que usar "disabled". Si no se hace esta distinción,
+     los dos quedarían editables siempre. */
+  camposExp.forEach(id => {
+    const campo = document.getElementById(id);
+    if (!campo) return;
+    if (campo.tagName === 'SELECT') campo.disabled = !activo;
+    else campo.readOnly = !activo;
+  });
   document.getElementById('expNombre').readOnly = !activo;
   document.getElementById('expTipo').disabled = !activo;
   document.getElementById('fotoAccionesExp').hidden = !activo;
@@ -685,6 +937,10 @@ function modoEdicionExp(activo){
   }
   document.getElementById('btnEditarExp').hidden = activo;
   document.getElementById('btnGuardarExp').hidden = !activo;
+
+  /* Va al final, porque necesita saber si ya estamos en modo edición
+     para decidir si el campo de unidad se puede escribir. */
+  aplicarUnidadExpSegunTipo();
 }
 document.getElementById('btnEditarExp').addEventListener('click', () => modoEdicionExp(true));
 document.getElementById('btnVolverExp').addEventListener('click', () => {
@@ -736,11 +992,26 @@ document.getElementById('btnGuardarExp').addEventListener('click', async () => {
   const nombreDB = partesNombre[0] || '';
   const apellidoDB = partesNombre.slice(1).join(' ') || '';
 
-  // 2. Tipo de empleado (el puesto se deriva de él)
+  // 2. Tipo de empleado
   const tipoSeleccionado = document.getElementById('expTipo').value;
   if (!TIPOS_EMPLEADO[tipoSeleccionado]) {
     avisar('Escoge el tipo de empleado (Técnico socio o Técnico no socio).');
     document.getElementById('expTipo').focus();
+    return;
+  }
+
+  // 3. Puesto: ahora es una lista y es obligatorio
+  const puestoExp = document.getElementById('dPuesto').value;
+  if (!puestoExp) {
+    avisar('Escoge el puesto del empleado.');
+    document.getElementById('dPuesto').focus();
+    return;
+  }
+
+  const unidadExp = normalizarUnidad(document.getElementById('dUnidad').value);
+  if (unidadExp === null) {
+    avisar('El código de unidad debe ser SI- y un número del 1 al 99. Por ejemplo: SI-01');
+    document.getElementById('dUnidad').focus();
     return;
   }
   const salarioExp = document.getElementById('dSalario').value.trim();
@@ -756,7 +1027,10 @@ document.getElementById('btnGuardarExp').addEventListener('click', async () => {
     email: document.getElementById('dCorreo').value.trim(),
     direccion: document.getElementById('dDireccion').value.trim(),
     fecha_contratacion: document.getElementById('dIngreso').value,
-    id_puesto: PUESTO_POR_TIPO[tipoSeleccionado],
+    /* Igual que en el formulario grande: se manda el puesto escogido,
+       no el deducido del tipo, y se manda la unidad. */
+    id_puesto: Number(puestoExp),
+    unidad_codigo: tipoSeleccionado === 'ADMINISTRATIVO' ? '' : unidadExp,
     tipo_empleado: tipoSeleccionado,
     ...(salarioExp !== '' ? { salario_base: Number(salarioExp.replace(/[,Qq\s]/g, '')) || 0 } : {}),
     fecha_nacimiento: document.getElementById('dNacimiento').value,
@@ -778,6 +1052,10 @@ document.getElementById('btnGuardarExp').addEventListener('click', async () => {
       document.getElementById('expPuesto').textContent = empActualizado.puesto || '—';
       document.getElementById('expUnidad').textContent = empActualizado.unidad || 'Sin unidad';
     }
+
+    /* Se vuelve a leer el historial para que el cambio que se acaba
+       de hacer aparezca de una vez en "Actividad reciente". */
+    pintarHistorial(codigoActual);
     
     fotoPendiente = undefined;
     avisar('Los cambios de ' + nombreNuevo + ' se guardaron correctamente.');
@@ -938,13 +1216,42 @@ document.getElementById('formPermiso').addEventListener('submit', async e => {
 /* ============================================================
    Arranque
    ============================================================ */
-cargarTodos();
+/* Los catálogos se cargan ANTES de la lista: los selects de puesto y
+   unidad tienen que estar llenos para poder mostrar el valor actual
+   del empleado cuando se abra el formulario o el expediente. */
+conectarCampoUnidad('fUnidad');
+conectarCampoUnidad('dUnidad');
+
+cargarCatalogos()
+  .then(cargarTodos)
+  .then(() => {
+    if (location.hash.slice(1) === 'nuevo') abrirFormularioEmpleado(null);
+  });
+
 llenarUnidades();
 actualizarCifras();
 pintarLista();
-if (location.hash.slice(1) === 'nuevo') abrirFormularioEmpleado(null);
 
-/* Al cambiar el tipo en el expediente se actualiza el punto de color */
+/* Al cambiar el tipo en el expediente se actualiza el punto de color
+   y se ajusta el campo de unidad (los administrativos no llevan). */
 document.getElementById('expTipo').addEventListener('change', e => {
   document.getElementById('expPunto').className = 'punto ' + puntoTipo(TIPOS_EMPLEADO[e.target.value]);
+  aplicarUnidadExpSegunTipo();
 });
+
+/* Mismo criterio que en el formulario grande: si el empleado es
+   administrativo no pertenece a ninguna cuadrilla, así que el campo
+   se apaga y se limpia. Sin esto se podía escribir una unidad que al
+   guardar se iba a descartar, sin explicar por qué. */
+function aplicarUnidadExpSegunTipo(){
+  const campo = document.getElementById('dUnidad');
+  if (!campo) return;
+
+  const editando = !document.getElementById('btnGuardarExp').hidden;
+  const esAdministrativo = document.getElementById('expTipo').value === 'ADMINISTRATIVO';
+
+  campo.readOnly = !editando || esAdministrativo;
+  campo.style.opacity = esAdministrativo ? '.5' : '1';
+  campo.title = esAdministrativo ? 'Los administrativos no se asignan a una unidad.' : '';
+  if (esAdministrativo) campo.value = '';
+}

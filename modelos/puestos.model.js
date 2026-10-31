@@ -10,12 +10,29 @@ const { sql, obtenerPool } = require("../basededatos/conexion");
 
 async function obtenerTodos() {
     const pool = await obtenerPool();
+    /* Se trae de una vez cuántos empleados usan cada puesto, para que
+       la pantalla de Mantenimiento pueda mostrarlo y bloquear el
+       botón de borrar en los que están en uso. */
     const resultado = await pool.request().query(`
-        SELECT id_puesto, nombre, descripcion
-        FROM Puesto
-        ORDER BY nombre ASC
+        SELECT
+            p.id_puesto,
+            p.nombre,
+            p.descripcion,
+            (SELECT COUNT(*) FROM Empleado e WHERE e.id_puesto = p.id_puesto) AS empleados
+        FROM Puesto p
+        ORDER BY p.nombre ASC
     `);
     return resultado.recordset;
+}
+
+/* Cuántos empleados tienen asignado este puesto. Se usa antes de
+   borrar: si hay aunque sea uno, no se permite. */
+async function contarEmpleados(id) {
+    const pool = await obtenerPool();
+    const resultado = await pool.request()
+        .input("id_puesto", sql.Int, id)
+        .query(`SELECT COUNT(*) AS total FROM Empleado WHERE id_puesto = @id_puesto`);
+    return resultado.recordset[0].total;
 }
 
 async function obtenerPorId(id) {
@@ -81,4 +98,4 @@ async function eliminar(id) {
     return resultado.recordset[0];
 }
 
-module.exports = { obtenerTodos, obtenerPorId, crear, actualizar, eliminar };
+module.exports = { obtenerTodos, obtenerPorId, crear, actualizar, eliminar, contarEmpleados };

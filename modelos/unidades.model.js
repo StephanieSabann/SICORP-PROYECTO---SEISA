@@ -114,6 +114,45 @@ async function asignarEmpleado(idUnidad, idEmpleado) {
     return resultado.recordset[0];
 }
 
+/* Cambia el código de una unidad. El código viejo se queda en el
+   historial de los empleados que la tuvieron, así que renombrarla
+   no borra el pasado. */
+async function actualizarCodigo(idUnidad, codigo) {
+    const pool = await obtenerPool();
+    const resultado = await pool.request()
+        .input("id_unidad", sql.Int, idUnidad)
+        .input("codigo", sql.VarChar(10), codigo)
+        .query(`
+            UPDATE Unidad
+            SET codigo = @codigo
+            OUTPUT INSERTED.id_unidad, INSERTED.codigo
+            WHERE id_unidad = @id_unidad
+        `);
+    return resultado.recordset[0];
+}
+
+/* Cuántos empleados tiene asignados la unidad ahora mismo.
+   Se usa antes de borrarla: si tiene aunque sea uno, no se permite. */
+async function contarEmpleados(idUnidad) {
+    const pool = await obtenerPool();
+    const resultado = await pool.request()
+        .input("id_unidad", sql.Int, idUnidad)
+        .query(`SELECT COUNT(*) AS total FROM Unidad_empleado WHERE id_unidad = @id_unidad`);
+    return resultado.recordset[0].total;
+}
+
+async function eliminar(idUnidad) {
+    const pool = await obtenerPool();
+    const resultado = await pool.request()
+        .input("id_unidad", sql.Int, idUnidad)
+        .query(`
+            DELETE FROM Unidad
+            OUTPUT DELETED.id_unidad, DELETED.codigo
+            WHERE id_unidad = @id_unidad
+        `);
+    return resultado.recordset[0];
+}
+
 async function quitarEmpleado(idUnidadEmpleado) {
     const pool = await obtenerPool();
     const resultado = await pool.request()
@@ -127,6 +166,6 @@ async function quitarEmpleado(idUnidadEmpleado) {
 }
 
 module.exports = {
-    obtenerTodos, crear, actualizarEstado,
+    obtenerTodos, crear, actualizarEstado, actualizarCodigo, eliminar, contarEmpleados,
     obtenerEmpleadosDeUnidad, asignarEmpleado, quitarEmpleado
 };

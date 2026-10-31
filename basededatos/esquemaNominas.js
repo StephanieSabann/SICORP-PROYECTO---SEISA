@@ -174,14 +174,28 @@ function prepararEsquemaNominas() {
     if (!promesa) {
         promesa = (async () => {
             const pool = await obtenerPool();
+            let fallaron = 0;
+
             for (const paso of PASOS) {
                 try {
                     await pool.request().query(paso);
                 } catch (error) {
+                    fallaron++;
                     console.error("[Nóminas] No se pudo aplicar un paso del esquema:\n", paso.split("\n")[0], "\n→", error.message);
                 }
             }
-            console.log("[Nóminas] Tablas de nóminas listas.");
+
+            /* Antes este mensaje decía "listas" aunque hubieran fallado
+               TODOS los pasos, y eso escondía el problema: se veía el
+               servidor arrancar bien mientras las tablas no existían.
+               Ahora dice la verdad y señala qué correr a mano. */
+            if (fallaron === 0) {
+                console.log("[Nóminas] Tablas de nóminas listas.");
+            } else {
+                console.error(`[Nóminas] ATENCIÓN: ${fallaron} de ${PASOS.length} pasos del esquema fallaron. ` +
+                    `Revisa los errores de arriba y corre a mano basededatos/nominas.sql y ` +
+                    `basededatos/nominas_mantenimiento.sql en la base Seisa.`);
+            }
         })().catch(error => {
             promesa = undefined;
             console.error("[Nóminas] No se pudo preparar el esquema:", error.message);

@@ -91,14 +91,27 @@ function prepararEsquemaReportes() {
     if (!promesa) {
         promesa = (async () => {
             const pool = await obtenerPool();
+            let fallaron = 0;
+
             for (const paso of PASOS) {
                 try {
                     await pool.request().query(paso);
                 } catch (error) {
+                    fallaron++;
                     console.error("[Reportes] No se pudo aplicar un paso del esquema:\n", paso.split("\n")[0], "\n→", error.message);
                 }
             }
-            console.log("[Reportes] Tablas de reportes listas.");
+
+            /* Antes este mensaje decía "listas" aunque hubieran fallado
+               TODOS los pasos, y eso escondía el problema: se veía el
+               servidor arrancar bien mientras las tablas no existían.
+               Ahora dice la verdad y señala qué correr a mano. */
+            if (fallaron === 0) {
+                console.log("[Reportes] Tablas de reportes listas.");
+            } else {
+                console.error(`[Reportes] ATENCIÓN: ${fallaron} de ${PASOS.length} pasos del esquema fallaron. ` +
+                    `Revisa los errores de arriba y corre a mano basededatos/reportes.sql en la base Seisa.`);
+            }
         })().catch(error => {
             promesa = undefined;
             console.error("[Reportes] No se pudo preparar el esquema:", error.message);

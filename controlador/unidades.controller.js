@@ -1,4 +1,5 @@
 const model = require("../modelos/unidades.model");
+const { normalizarCodigoUnidad } = require("../utilidades/codigoUnidad");
 
 async function obtenerTodos(req, res) {
     try {
@@ -24,14 +25,12 @@ function validarFecha(valor){
 
 async function crear(req, res) {
     try {
-        const codigo = (req.body.codigo || "").trim().toUpperCase();
+        /* Mismo formato que exige el módulo de Empleados: SI-01 ... SI-99 */
+        const codigo = normalizarCodigoUnidad(req.body.codigo);
         const id_empleado = req.body.id_empleado ? Number(req.body.id_empleado) : null;
 
         if (!codigo) {
-            throw new Error("Escribe el código de la unidad (por ejemplo S1).");
-        }
-        if (codigo.length > 10) {
-            throw new Error("El código no puede superar los 10 caracteres.");
+            throw new Error("Escribe el código de la unidad (por ejemplo SI-01).");
         }
         if (id_empleado !== null && (!Number.isInteger(id_empleado) || id_empleado <= 0)) {
             throw new Error("El empleado seleccionado no es válido.");
@@ -85,6 +84,113 @@ async function obtenerEmpleados(req, res) {
     }
 }
 
+/* Cambia el código de una unidad (por ejemplo, arreglar una vieja
+   que quedó como "S1" y debe ser "SI-01"). */
+async function actualizarCodigo(req, res) {
+    try {
+        const id = Number(req.params.id);
+
+        if (!Number.isInteger(id) || id <= 0) {
+            throw new Error("La unidad no es válida.");
+        }
+
+        const codigo = normalizarCodigoUnidad(req.body.codigo);
+
+        if (!codigo) {
+            throw new Error("Escribe el código de la unidad (por ejemplo SI-01).");
+        }
+
+        const actualizada = await model.actualizarCodigo(id, codigo);
+
+        if (!actualizada) {
+            return res.status(404).json({ exito: false, mensaje: "Esa unidad ya no existe." });
+        }
+
+        res.status(200).json({
+            exito: true,
+            mensaje: "Unidad actualizada a " + codigo + ".",
+            datos: actualizada
+        });
+    } catch (error) {
+        console.error("Error al actualizar la unidad:", error);
+        /* Si ya existe otra unidad con ese código, SQL Server lo rechaza
+           por el índice único y aquí se traduce a algo entendible. */
+        const duplicado = /violation of unique|duplicate key/i.test(error.message || "");
+        res.status(400).json({
+            exito: false,
+            mensaje: duplicado ? "Ya existe otra unidad con ese código." : error.message
+        });
+    }
+}
+
+/* Borra una unidad. Nunca se permite si tiene empleados asignados:
+   esas personas quedarían sin cuadrilla sin que nadie se entere. */
+async function eliminar(req, res) {
+    try {
+        const id = Number(req.params.id);
+
+        if (!Number.isInteger(id) || id <= 0) {
+            throw new Error("La unidad no es válida.");
+        }
+
+        const enUso = await model.contarEmpleados(id);
+
+        if (enUso > 0) {
+            return res.status(409).json({
+                exito: false,
+                mensaje: enUso === 1
+                    ? "No se puede borrar: hay 1 empleado asignado a esta unidad. Cámbialo de unidad primero."
+                    : `No se puede borrar: hay ${enUso} empleados asignados a esta unidad. Cámbialos de unidad primero.`
+            });
+        }
+
+        const eliminada = await model.eliminar(id);
+
+        if (!eliminada) {
+            return res.status(404).json({ exito: false, mensaje: "Esa unidad ya no existe." });
+        }
+
+        res.status(200).json({
+            exito: true,
+            mensaje: "Unidad " + (eliminada.codigo || eliminada.id_unidad) + " eliminada."
+        });
+    } catch (error) {
+        console.error("Error al eliminar la unidad:", error);
+        res.status(400).json({ exito: false, mensaje: error.message });
+    }
+}
+
+/* Asigna un empleado a una unidad.
+   Esta función faltaba: modelos/unidades.model.js ya traía
+   asignarEmpleado(), pero no había controlador ni ruta que la
+   llamara, así que era código muerto y no existía forma de
+   asignarle una unidad a nadie desde el sistema. */
+async function asignarEmpleado(req, res) {
+    try {
+        const idUnidad = Number(req.params.id);
+        const idEmpleado = Number(req.body ? req.body.id_empleado : NaN);
+
+        if (!Number.isInteger(idUnidad) || idUnidad <= 0) {
+            return res.status(400).json({ exito: false, mensaje: "La unidad no es válida." });
+        }
+
+        if (!Number.isInteger(idEmpleado) || idEmpleado <= 0) {
+            return res.status(400).json({ exito: false, mensaje: "El empleado no es válido." });
+        }
+
+        const asignado = await model.asignarEmpleado(idUnidad, idEmpleado);
+
+        res.status(201).json({
+            exito: true,
+            mensaje: "Empleado asignado a la unidad.",
+            datos: asignado
+        });
+    } catch (error) {
+        console.error("Error al asignar el empleado a la unidad:", error);
+        res.status(500).json({ exito: false, mensaje: "No se pudo asignar el empleado a la unidad." });
+    }
+}
+
 async function quitarEmpleado(req, res) {
     try {
         const idUnidadEmpleado = Number(req.params.idUnidadEmpleado);
@@ -99,4 +205,4 @@ async function quitarEmpleado(req, res) {
     }
 }
 
-module.exports = { obtenerTodos, crear, actualizarEstado, obtenerEmpleados, quitarEmpleado };
+module.exports = { obtenerTodos, crear, actualizarEstado, actualizarCodigo, eliminar, obtenerEmpleados, asignarEmpleado, quitarEmpleado };

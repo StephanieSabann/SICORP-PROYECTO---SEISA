@@ -5,6 +5,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Empleados — SICORP</title>
+  <!-- Icono de la pestana del navegador (emblema de SEISA) -->
+  <link rel="icon" href="img/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="img/favicon.png">
+  <link rel="apple-touch-icon" href="img/favicon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -213,10 +217,13 @@
               <option value="">Unidad</option>
             </select>
 
+            <!-- Por defecto solo se ven los empleados activos. Los que se
+                 dieron de baja se consultan escogiendo "Inactivo", y
+                 "Todos" muestra las dos cosas juntas. -->
             <select id="filtroEstadoEmp" aria-label="Filtrar por estado">
-              <option value="">Estado</option>
-              <option value="activo">Activo</option>
+              <option value="activo" selected>Activo</option>
               <option value="inactivo">Inactivo</option>
+              <option value="">Todos</option>
             </select>
 
             <div class="vistas-toggle">
@@ -343,8 +350,10 @@
 
               <label class="campo">
                 <span>Puesto <i class="obligatorio">*</i></span>
-                <input type="text" id="fPuesto" placeholder="Inspector, Auxiliar de inspección, etc.">
-                <em class="error">Escribe el puesto.</em>
+                <select id="fPuesto">
+                  <option value="">Selecciona el puesto</option>
+                </select>
+                <em class="error">Selecciona el puesto.</em>
               </label>
               <label class="campo">
                 <span>Fecha de ingreso <i class="obligatorio">*</i></span>
@@ -357,10 +366,15 @@
                 <em class="error">Escribe el salario base.</em>
               </label>
               <label class="campo">
-                <span>Código de unidad</span>
-                <input type="text" id="fUnidad" placeholder="SI-01">
+                <span>Unidad (cuadrilla)</span>
+                <input type="text" id="fUnidad" list="listaUnidades" maxlength="6"
+                       autocomplete="off" placeholder="SI-01">
               </label>
-              <p class="nota">El código de unidad aplica solo para técnicos y auxiliares.</p>
+              <p class="nota">El código debe ser <b>SI-</b> y un número del 1 al 99 (SI-01, SI-21). Puedes escribir solo el número. Aplica para técnicos y auxiliares; si la unidad no existe, se crea sola.</p>
+
+              <!-- Sugerencias de unidades. La comparten el formulario y el
+                   expediente; se llena desde la base en empleados.js -->
+              <datalist id="listaUnidades"></datalist>
 
               <div class="aviso-form">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 8v.01M12 11.5v4.5"/></svg>
@@ -467,9 +481,9 @@
                 </h4>
                 <div class="datos">
                   <div class="dato"><span>Fecha de ingreso:</span><input id="dIngreso" type="date" readonly></div>
-                  <div class="dato"><span>Puesto:</span><input id="dPuesto" readonly></div>
-                  <div class="dato"><span>Salario base:</span><input id="dSalario" type="number" step="0.01" readonly></div>
-                  <div class="dato"><span>Código de unidad:</span><input id="dUnidad" readonly></div>
+                  <div class="dato"><span>Puesto:</span><select id="dPuesto" disabled></select></div>
+                  <div class="dato"><span>Salario base:</span><input id="dSalario" type="number" step="0.01" min="0" readonly></div>
+                  <div class="dato"><span>Unidad (cuadrilla):</span><input id="dUnidad" list="listaUnidades" maxlength="6" autocomplete="off" placeholder="SI-01" readonly></div>
                 </div>
               </div>
 

@@ -665,7 +665,16 @@ input[type="date"][readonly]::-webkit-calendar-picker-indicator{
 /* ---------- barra del directorio ---------- */
 .barra-directorio{display:flex;align-items:center;gap:clamp(8px,1vw,16px);flex-wrap:wrap;margin-bottom:clamp(12px,1.4vw,22px)}
 .barra-directorio .campo-busca{flex:0 1 clamp(200px,24vw,360px)}
-.barra-directorio select{flex:0 0 auto;width:clamp(128px,10vw,200px)}
+/* Los filtros se ajustan a su propio texto en vez de llevar todos el
+   mismo ancho fijo. Antes "Tipo de empleado" y "Técnico sin clasificar"
+   no cabían y salían cortados, porque el ancho era el mismo que el de
+   "Unidad". El min-width evita que los cortos queden diminutos. */
+.barra-directorio select{
+  flex:0 1 auto;
+  width:auto;
+  min-width:clamp(128px,10vw,180px);
+  max-width:100%;
+}
 .vistas-toggle{margin-left:auto;display:flex;gap:10px}
 .vistas-toggle button{
   display:inline-flex;align-items:center;gap:10px;background:var(--panel-2);
@@ -1208,4 +1217,32 @@ input[type="date"][readonly]::-webkit-calendar-picker-indicator{
 @media (max-width:560px){
   .rejilla-categorias{grid-template-columns:1fr}
   .panel-inv{flex-direction:column;align-items:stretch}
+}
+/* Código de unidad con formato equivocado (debe ser SI-01 ... SI-99).
+   Se marca mientras se escribe, sin esperar a mandar el formulario. */
+input.unidad-mala{
+  border-color:var(--rojo-vivo);
+  box-shadow:0 0 0 3px rgba(227,69,63,.16);
+}
+
+/* Botones Editar / Borrar dentro de una fila de Mantenimiento.
+   Se agrupan en una sola línea, sin márgenes que descuadren la fila.
+
+   OJO: esta regla NO debe depender de .fila-mant. La lista de puestos
+   usa .fila-mant pero la tabla de unidades usa .fila, y cuando la
+   regla pedía .fila-mant los botones de las unidades se quedaban sin
+   "display:flex" y salían apilados uno debajo del otro, estirando
+   toda la fila de la tabla. */
+.acciones-fila-mant,
+.tabla .fila .acciones-fila-mant{
+  display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:nowrap;
+}
+/* Solo los botones DE UNA FILA van pegados a la derecha. Los de los
+   formularios (Crear puesto, Crear unidad) se quedan a la izquierda,
+   como estaban antes. */
+.tabla .fila .acciones-fila-mant,
+.lista-mant .fila-mant .acciones-fila-mant{justify-content:flex-end}
+.acciones-fila-mant .btn-linea[disabled],
+.acciones-fila-mant .btn-rojo[disabled]{
+  opacity:.4;cursor:not-allowed;
 }

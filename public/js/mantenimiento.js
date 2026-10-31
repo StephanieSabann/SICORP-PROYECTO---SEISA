@@ -265,13 +265,90 @@ async function cargarPuestosMant(){
   try {
     const r = await api('/api/puestos');
     const puestos = r.datos || [];
-    caja.innerHTML = puestos.length
-      ? puestos.map(x => `<div class="fila-mant"><span>${escaparMant(x.nombre)}${x.descripcion ? `<small>${escaparMant(x.descripcion)}</small>` : ''}</span></div>`).join('')
-      : '<p class="vacio-mini">Todavía no hay puestos creados.</p>';
+
+    if (!puestos.length) {
+      caja.innerHTML = '<p class="vacio-mini">Todavía no hay puestos creados.</p>';
+      return;
+    }
+
+    /* Cada puesto trae cuántos empleados lo usan. Los que están en uso
+       no se pueden borrar: esos empleados quedarían apuntando a un
+       puesto inexistente. El botón se muestra apagado y explica por qué. */
+    caja.innerHTML = puestos.map(x => {
+      const enUso = Number(x.empleados || 0);
+      const usoTexto = enUso === 0 ? 'Sin empleados'
+        : enUso === 1 ? '1 empleado' : enUso + ' empleados';
+
+      return `<div class="fila-mant" data-puesto="${x.id_puesto}">
+        <span>${escaparMant(x.nombre)}
+          <small>${x.descripcion ? escaparMant(x.descripcion) + ' · ' : ''}${usoTexto}</small>
+        </span>
+        <span class="acciones-fila-mant">
+          <button type="button" class="btn-linea chico" data-accion="editar-puesto">Editar</button>
+          <button type="button" class="btn-linea chico quitar" data-accion="borrar-puesto"
+            ${enUso ? 'disabled title="Tiene empleados asignados. Cámbiales el puesto primero."' : ''}>Borrar</button>
+        </span>
+      </div>`;
+    }).join('');
+
+    caja.querySelectorAll('[data-accion]').forEach(boton => {
+      const fila = boton.closest('.fila-mant');
+      const id = fila.dataset.puesto;
+      const nombre = fila.querySelector('span').childNodes[0].textContent.trim();
+
+      const puesto = puestos.find(p => String(p.id_puesto) === String(id));
+
+      if (boton.dataset.accion === 'editar-puesto') {
+        boton.addEventListener('click', () => editarPuestoMant(id, puesto.nombre, puesto.descripcion));
+      } else {
+        boton.addEventListener('click', () => borrarPuestoMant(id, puesto.nombre));
+      }
+    });
   } catch (error) {
     caja.innerHTML = `<p class="vacio-mini">No se pudo cargar la lista: ${escaparMant(error.message)}<br>
       <small>Si el error dice algo de "Puesto", es que esa tabla necesita revisarse — avísame cómo está armada y ajusto esto.</small></p>`;
   }
+}
+
+/* Editar: en vez de una ventanita del navegador, se reutiliza el mismo
+   formulario de arriba. Se llena con los datos del puesto y el botón
+   cambia a "Guardar cambios". El nombre viejo queda guardado en el
+   historial de cada empleado, así que renombrar no borra el pasado. */
+let puestoEditando = null;
+
+function editarPuestoMant(id, nombre, descripcion){
+  puestoEditando = id;
+  document.getElementById('puestoNombre').value = nombre;
+  document.getElementById('puestoDescripcion').value = descripcion || '';
+  document.getElementById('puestoDescripcion').dispatchEvent(new Event('input'));
+  document.getElementById('tituloFormPuesto').textContent = 'Editar puesto';
+  document.getElementById('textoBotonPuesto').textContent = 'Guardar cambios';
+  document.getElementById('btnCancelarPuesto').hidden = false;
+  document.getElementById('puestoNombre').focus();
+}
+
+function salirDeEdicionPuesto(){
+  puestoEditando = null;
+  document.getElementById('formNuevoPuesto').reset();
+  document.getElementById('puestoNombre').closest('.campo').classList.remove('mal');
+  document.getElementById('contadorPuestoDesc').textContent = '0 / 64';
+  document.getElementById('tituloFormPuesto').textContent = 'Nuevo puesto';
+  document.getElementById('textoBotonPuesto').textContent = 'Crear puesto';
+  document.getElementById('btnCancelarPuesto').hidden = true;
+}
+
+document.getElementById('btnCancelarPuesto').addEventListener('click', salirDeEdicionPuesto);
+
+function borrarPuestoMant(id, nombre){
+  confirmar('¿Borrar el puesto?', 'Se va a eliminar "' + nombre + '". Esto no se puede deshacer.', 'Borrar', async () => {
+    try {
+      await api('/api/puestos/' + id, { method: 'DELETE' });
+      avisar('Puesto "' + nombre + '" eliminado.');
+      cargarPuestosMant();
+    } catch (error) {
+      avisar(error.message || 'No se pudo borrar el puesto.');
+    }
+  });
 }
 
 /* Contador de caracteres para la descripción del puesto (64 máx.) */
@@ -300,13 +377,23 @@ document.getElementById('formNuevoPuesto').addEventListener('submit', async e =>
   wrapper.classList.remove('mal');
 
   try {
-    await api('/api/puestos', { method: 'POST', body: JSON.stringify({ nombre, descripcion }) });
-    avisar('Puesto "' + nombre + '" creado correctamente.');
-    e.target.reset();
-    document.getElementById('contadorPuestoDesc').textContent = '0 / 64';
+    /* El mismo formulario sirve para crear y para editar: si hay un
+       puesto en edición se manda PATCH, si no, POST. */
+    if (puestoEditando) {
+      await api('/api/puestos/' + puestoEditando, {
+        method: 'PATCH',
+        body: JSON.stringify({ nombre, descripcion })
+      });
+      avisar('Puesto actualizado a "' + nombre + '".');
+    } else {
+      await api('/api/puestos', { method: 'POST', body: JSON.stringify({ nombre, descripcion }) });
+      avisar('Puesto "' + nombre + '" creado correctamente.');
+    }
+
+    salirDeEdicionPuesto();
     cargarPuestosMant();
   } catch (error) {
-    avisar(error.message || 'No se pudo crear el puesto.');
+    avisar(error.message || 'No se pudo guardar el puesto.');
   }
 });
 
@@ -400,6 +487,7 @@ document.getElementById('formNuevaUnidad').addEventListener('submit', async e =>
     document.getElementById('unidadFecha').value = new Date().toISOString().slice(0, 10);
     cargarUnidadesMant();
   } catch (error) {
+    wrapper.classList.add('mal');
     avisar(error.message || 'No se pudo crear la unidad.');
   }
 });

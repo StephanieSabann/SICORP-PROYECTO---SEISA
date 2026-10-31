@@ -15,6 +15,8 @@ const { prepararEsquemaInventario, esquemaInventarioListo } = require("./baseded
 const { prepararEsquemaNominas, esquemaNominasListo } = require("./basededatos/esquemaNominas");
 // Y para Reportes (parámetros, bitácora, envíos programados, costos...).
 const { prepararEsquemaReportes, esquemaReportesListo } = require("./basededatos/esquemaReportes");
+// Y para Empleados (historial de cambios del expediente).
+const { prepararEsquemaEmpleados, esquemaEmpleadosListo } = require("./basededatos/esquemaEmpleados");
 
 app.use(express.json()); //Permite recibir JSON desde fetch()
 
@@ -127,7 +129,7 @@ const movimientosInventarioRoutes = require("./rutas/movimientosInventario.route
 const conteosInventarioRoutes = require("./rutas/conteosInventario.routes");
 
 app.use('/api/credenciales', requiereLoginAPI, requiereAcceso('Usuarios'), credencialesRoutes);
-app.use("/api/empleados", requiereLoginAPI, requiereAcceso('Empleados'), esquemaNominasListo, empleadosRoutes);
+app.use("/api/empleados", requiereLoginAPI, requiereAcceso('Empleados'), esquemaNominasListo, esquemaEmpleadosListo, empleadosRoutes);
 app.use("/api/roles", requiereLoginAPI, requiereAcceso('Usuarios'), rolesRoutes);
 app.use("/api/accesos", requiereLoginAPI, requiereAcceso('Usuarios'), accesosRoutes);
 app.use("/api/usuarios", requiereLoginAPI, requiereAcceso('Usuarios'), usuariosRoutes);
@@ -453,5 +455,6 @@ app.listen(PORT, "0.0.0.0", async () => { //0.0.0.0 significa que esta escuchand
     prepararEsquemaInventario().catch(() => {});
     prepararEsquemaNominas().catch(() => {});
     prepararEsquemaReportes().catch(() => {});
+    prepararEsquemaEmpleados().catch(() => {});
 
 });
